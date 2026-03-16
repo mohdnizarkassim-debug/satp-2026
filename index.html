@@ -1,0 +1,1518 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SATP 2026 V5.0 — Sistem Analisis Tayar Perdagangan</title>
+<style>
+:root {
+  --jpj-blue:    #003366;
+  --jpj-blue-mid:#1a4f8a;
+  --jpj-blue-lt: #e8eef6;
+  --jpj-red:     #c0392b;
+  --jpj-red-lt:  #fdf0ef;
+  --safe:        #1a7a3c;
+  --safe-lt:     #eaf6ee;
+  --warn:        #d97706;
+  --warn-lt:     #fff8ec;
+  --bg:          #f0f4f8;
+  --surface:     #ffffff;
+  --border:      #d1dae6;
+  --border-dark: #8fa3bf;
+  --text:        #1e2d3d;
+  --text-sub:    #4a6080;
+  --text-muted:  #7a92ab;
+  --radius-sm:   6px;
+  --radius-md:   10px;
+  --radius-lg:   16px;
+  --shadow-sm:   0 1px 4px rgba(0,51,102,0.08);
+  --shadow-md:   0 4px 16px rgba(0,51,102,0.12);
+  --shadow-lg:   0 8px 32px rgba(0,51,102,0.16);
+  --transition:  all 0.2s ease;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  line-height: 1.5;
+}
+
+.page-wrap {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 20px 16px 40px;
+}
+
+/* ── SCREEN HEADER ── */
+.screen-header {
+  background: linear-gradient(135deg, var(--jpj-blue) 0%, var(--jpj-blue-mid) 100%);
+  color: white; padding: 22px 28px; border-radius: var(--radius-lg);
+  margin-bottom: 14px; box-shadow: var(--shadow-lg);
+  display: flex; align-items: center; gap: 20px;
+  position: relative; overflow: hidden;
+}
+.screen-header::before {
+  content:''; position:absolute; top:-40px; right:-40px;
+  width:160px; height:160px; background:rgba(255,255,255,0.05); border-radius:50%;
+}
+.screen-header::after {
+  content:''; position:absolute; bottom:-20px; left:40%;
+  width:200px; height:200px; background:rgba(255,255,255,0.03); border-radius:50%;
+}
+.header-icon { font-size:2.8em; line-height:1; flex-shrink:0; }
+.header-text { flex:1; }
+.header-text h1 { font-size:1.4em; font-weight:800; letter-spacing:0.04em; text-transform:uppercase; margin-bottom:2px; }
+.header-text h2 { font-size:0.88em; font-weight:400; opacity:0.85; }
+.header-badge {
+  background:rgba(255,255,255,0.15); border:1px solid rgba(255,255,255,0.25);
+  border-radius:var(--radius-sm); padding:6px 12px;
+  font-size:0.75em; font-weight:700; letter-spacing:0.05em;
+  text-align:center; line-height:1.5; flex-shrink:0;
+}
+
+/* ── PINDAAN BAR ── */
+.pindaan-bar {
+  background: var(--warn-lt); border: 1.5px solid var(--warn);
+  border-left: 5px solid var(--warn); border-radius: var(--radius-sm);
+  padding: 9px 16px; margin-bottom: 14px; font-size: 0.8em; color: #92400e;
+  display: flex; align-items: center; gap: 10px;
+}
+.pindaan-bar strong { color: var(--warn); }
+
+/* ── CARD ── */
+.card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius-md); box-shadow: var(--shadow-sm); margin-bottom: 14px;
+}
+.card-header {
+  padding: 12px 20px; border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 10px;
+  background: linear-gradient(to right, var(--jpj-blue-lt), #f8fbff);
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
+}
+.card-header-icon {
+  width:28px; height:28px; background:var(--jpj-blue); color:white;
+  border-radius:var(--radius-sm); display:flex; align-items:center; justify-content:center;
+  font-size:0.85em; flex-shrink:0;
+}
+.card-header h3 { font-size:0.85em; font-weight:700; color:var(--jpj-blue); text-transform:uppercase; letter-spacing:0.06em; }
+.card-body { padding: 18px 20px; }
+
+/* ── FORM GRIDS ── */
+.form-grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.form-grid-3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; }
+.form-grid-4 { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; }
+
+@media(max-width:900px) {
+  .form-grid-4 { grid-template-columns:1fr 1fr; }
+  .form-grid-3 { grid-template-columns:1fr 1fr; }
+}
+@media(max-width:600px) {
+  .form-grid-2, .form-grid-3, .form-grid-4 { grid-template-columns:1fr; }
+}
+
+/* ── FORM CONTROLS ── */
+.field { display:flex; flex-direction:column; gap:4px; }
+
+label.field-label {
+  font-size:0.72em; font-weight:700; color:var(--text-sub);
+  letter-spacing:0.05em; text-transform:uppercase;
+}
+label.field-label .req { color:var(--jpj-red); margin-left:2px; }
+
+input, select {
+  width:100%; padding:8px 11px; border:1.5px solid var(--border);
+  border-radius:var(--radius-sm); font-size:0.9em; font-weight:600;
+  color:var(--text); background:var(--surface); transition:var(--transition); outline:none;
+}
+input:focus, select:focus {
+  border-color:var(--jpj-blue-mid); box-shadow:0 0 0 3px rgba(26,79,138,0.1);
+}
+input.invalid { border-color:var(--jpj-red) !important; background:#fff8f8; animation: shake 0.3s ease; }
+@keyframes shake { 0%,100%{ transform:translateX(0); } 25%{ transform:translateX(-4px); } 75%{ transform:translateX(4px); } }
+input[readonly] { background:#edf2f7; color:var(--text-sub); cursor:not-allowed; }
+
+.field-hint { font-size:0.68em; color:var(--text-muted); margin-top:1px; }
+.field-hint.warn { color:var(--warn); }
+
+.input-row-3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:6px; }
+.input-row-2 { display:grid; grid-template-columns:1fr 1fr; gap:6px; }
+
+/* ── AXLE GRID ── */
+#axleInputGrid {
+  display:grid; grid-template-columns:repeat(auto-fit, minmax(290px, 1fr));
+  gap:14px; margin-top:14px;
+}
+.axle-box {
+  border:1.5px solid var(--border); border-radius:var(--radius-md);
+  overflow:hidden; background:var(--surface); transition:var(--transition);
+}
+.axle-box:hover { border-color:var(--jpj-blue-mid); box-shadow:var(--shadow-md); }
+
+.axle-title {
+  background:var(--jpj-blue); color:white; padding:9px 14px;
+  font-size:0.78em; font-weight:800; letter-spacing:0.08em; text-transform:uppercase;
+  display:flex; align-items:center; gap:8px;
+}
+.axle-title-num {
+  background:rgba(255,255,255,0.2); border-radius:4px;
+  width:20px; height:20px; display:flex; align-items:center; justify-content:center;
+  font-size:0.9em; font-weight:900;
+}
+.axle-body { padding:12px; display:flex; flex-direction:column; gap:9px; }
+
+.section-divider {
+  font-size:0.68em; font-weight:700; color:var(--text-muted);
+  text-transform:uppercase; letter-spacing:0.08em;
+  border-top:1px solid var(--border); padding-top:7px; margin-top:1px;
+}
+
+/* Sub-axle block (untuk 2 axle belakang bas) */
+.sub-axle-block {
+  border:1px dashed var(--border-dark); border-radius:var(--radius-sm);
+  padding:10px; background:#f9fbfd;
+}
+.sub-axle-label {
+  font-size:0.7em; font-weight:800; color:var(--jpj-blue-mid);
+  text-transform:uppercase; letter-spacing:0.06em; margin-bottom:8px;
+  display:flex; align-items:center; gap:5px;
+}
+
+/* Gandar 2 axle toggle */
+.axle2-toggle {
+  display:flex; gap:8px; align-items:center; margin-bottom:4px;
+}
+.toggle-btn {
+  padding:5px 12px; border:1.5px solid var(--border); border-radius:var(--radius-sm);
+  background:white; font-size:0.75em; font-weight:700; cursor:pointer;
+  color:var(--text-sub); transition:var(--transition);
+}
+.toggle-btn.active {
+  background:var(--jpj-blue); color:white; border-color:var(--jpj-blue);
+}
+
+/* ── BUTTONS ── */
+.btn-container { display:flex; gap:10px; margin-top:16px; flex-wrap:wrap; }
+.btn {
+  padding:11px 18px; border:none; border-radius:var(--radius-sm);
+  font-weight:800; cursor:pointer; font-size:0.86em; letter-spacing:0.05em;
+  text-transform:uppercase; transition:var(--transition);
+  display:flex; align-items:center; gap:7px; white-space:nowrap;
+}
+.btn:active { transform:scale(0.97); }
+.btn-main { background:var(--jpj-blue); color:white; flex:1; justify-content:center; box-shadow:0 4px 12px rgba(0,51,102,0.3); }
+.btn-main:hover { background:var(--jpj-blue-mid); }
+.btn-reset { background:#e2e8f0; color:var(--text-sub); }
+.btn-reset:hover { background:#cbd5e0; }
+.btn-print { background:var(--safe); color:white; display:none; box-shadow:0 4px 12px rgba(26,122,60,0.3); }
+.btn-print:hover { background:#156133; }
+
+/* ── WARNING BOX ── */
+.warning-box {
+  background:var(--warn-lt); border:1.5px solid var(--warn);
+  border-left:4px solid var(--warn); border-radius:var(--radius-sm);
+  padding:11px 15px; margin-bottom:14px; font-size:0.8em;
+}
+.warning-box-title { font-weight:800; color:var(--warn); margin-bottom:5px; display:flex; align-items:center; gap:6px; }
+.warning-box ul { padding-left:16px; color:#92400e; line-height:1.7; }
+
+/* ── REPORT ID BANNER ── */
+.report-id-banner {
+  background:linear-gradient(to right, var(--jpj-blue-lt), #f0f6ff);
+  border:1px solid var(--border); border-left:4px solid var(--jpj-blue);
+  border-radius:var(--radius-sm); padding:10px 16px; margin-bottom:14px;
+  display:flex; align-items:center; justify-content:space-between;
+  flex-wrap:wrap; gap:8px; font-size:0.78em;
+}
+.report-id-main { font-weight:800; color:var(--jpj-blue); font-size:1.05em; letter-spacing:0.04em; }
+.report-id-meta { color:var(--text-sub); display:flex; gap:14px; flex-wrap:wrap; }
+
+/* ── VERDICT BANNER ── */
+.verdict-banner {
+  padding:13px 18px; border-radius:var(--radius-sm); margin-bottom:14px;
+  display:flex; align-items:center; gap:12px;
+  font-weight:800; font-size:0.95em; letter-spacing:0.03em; text-transform:uppercase;
+}
+.verdict-all-pass { background:var(--safe-lt); border:1.5px solid var(--safe); color:var(--safe); }
+.verdict-has-fail { background:var(--jpj-red-lt); border:1.5px solid var(--jpj-red); color:var(--jpj-red); }
+.verdict-icon { font-size:1.5em; line-height:1; }
+.verdict-detail { font-size:0.76em; font-weight:400; color:var(--text-sub); text-transform:none; letter-spacing:0; }
+
+/* ── RESULTS GRID ── */
+#resultsArea { margin-top:16px; }
+.results-grid { display:grid; gap:14px; width:100%; }
+.grid-col-1 { grid-template-columns:1fr; max-width:500px; margin:0 auto; }
+.grid-col-2 { grid-template-columns:repeat(2,1fr); max-width:980px; margin:0 auto; }
+.grid-col-3 { grid-template-columns:repeat(3,1fr); }
+.grid-col-4 { grid-template-columns:repeat(2,1fr); max-width:1060px; margin:0 auto; }
+
+/* ── REPORT CARD ── */
+.report-col {
+  border:2px solid var(--border-dark); border-radius:var(--radius-md);
+  background:var(--surface); overflow:hidden; box-shadow:var(--shadow-sm); break-inside:avoid;
+}
+.report-col.pass { border-color:var(--safe); }
+.report-col.fail { border-color:var(--jpj-red); }
+
+.status-header {
+  padding:10px 15px; font-weight:900; text-align:center;
+  font-size:0.93em; letter-spacing:0.05em; text-transform:uppercase;
+  display:flex; align-items:center; justify-content:center; gap:8px;
+}
+.pass-bg { background:var(--safe-lt); color:var(--safe); }
+.fail-bg { background:var(--jpj-red-lt); color:var(--jpj-red); }
+
+.veh-info-block {
+  background:#f7fafd; border-bottom:1px solid var(--border);
+  padding:6px 12px; font-size:0.73em; color:var(--text-sub);
+  display:flex; flex-wrap:wrap; gap:3px 14px;
+}
+.veh-info-block strong { color:var(--text); }
+
+table { width:100%; border-collapse:collapse; }
+th, td {
+  padding:6px 11px; border-bottom:1px solid #e8eef4;
+  font-size:0.78em; text-align:left; vertical-align:middle;
+}
+th {
+  background:#f7fafd; width:44%; color:var(--text-sub);
+  font-weight:700; font-size:0.73em; text-transform:uppercase; letter-spacing:0.04em;
+}
+.val-bold { font-weight:800; color:var(--text); }
+.val-pass { color:var(--safe); font-weight:800; }
+.val-fail { color:var(--jpj-red); font-weight:800; }
+
+.badge {
+  display:inline-flex; align-items:center; gap:4px;
+  padding:2px 8px; border-radius:20px; font-size:0.8em; font-weight:700;
+}
+.badge-pass { background:var(--safe-lt); color:var(--safe); }
+.badge-fail { background:var(--jpj-red-lt); color:var(--jpj-red); }
+
+/* Speedometer — skrin sahaja, SEMBUNYI masa print */
+.speedo-wrap { display:block; }
+.speedo-table {
+  width:100%; font-size:0.74em; text-align:center;
+  border-radius:var(--radius-sm); overflow:hidden; border:1px solid var(--border);
+}
+.speedo-table th {
+  background:var(--jpj-blue); color:white; text-transform:uppercase;
+  font-size:0.76em; padding:4px 8px; letter-spacing:0.04em; width:auto;
+}
+.speedo-table td { padding:3px 8px; border-bottom:1px solid var(--border); font-weight:600; }
+.speedo-table tr:last-child td { border-bottom:none; }
+.speedo-table tr:nth-child(odd) td { background:#f7fafd; }
+
+/* Ruangan Ulasan & Pegawai Penyemak */
+.ulasan-block {
+  border-top:1px solid var(--border);
+  padding:8px 11px; font-size:0.78em;
+}
+.ulasan-label {
+  font-size:0.72em; font-weight:700; color:var(--text-sub);
+  text-transform:uppercase; letter-spacing:0.05em; margin-bottom:5px;
+}
+.ulasan-line {
+  border-bottom:1px solid var(--border-dark);
+  height:22px; margin-bottom:6px;
+}
+.pegawai-stamp {
+  font-size:0.76em; color:var(--jpj-blue); font-weight:700;
+  padding:4px 8px; border:1px solid var(--jpj-blue);
+  border-radius:var(--radius-sm); display:inline-block; margin-top:2px;
+}
+.ulasan-pegawai-row { margin-top:4px; }
+/* Skrin: tunjuk textarea, sorok garisan */
+.ulasan-textarea {
+  width:100%; min-height:52px; padding:6px 9px;
+  border:1.5px solid var(--border); border-radius:var(--radius-sm);
+  font-size:0.82em; font-family:inherit; color:var(--text);
+  resize:vertical; outline:none; transition:var(--transition);
+  display:block;
+}
+.ulasan-textarea:focus {
+  border-color:var(--jpj-blue-mid);
+  box-shadow:0 0 0 3px rgba(26,79,138,0.1);
+}
+.ulasan-garisan { display:none; }
+/* Ulasan teks cetak — sorok di skrin, tunjuk masa print */
+.ulasan-print-text { display:none; }
+
+/* ── FOOTNOTE ── */
+.footnote {
+  margin-top:14px; padding:11px 15px;
+  border:1.5px solid var(--border-dark); border-radius:var(--radius-sm);
+  background:#fffef0; font-size:0.77em; line-height:1.7;
+}
+.footnote-title {
+  font-weight:800; color:var(--jpj-blue); display:flex; align-items:center; gap:6px;
+  margin-bottom:5px; font-size:0.93em; text-transform:uppercase; letter-spacing:0.04em;
+}
+.footnote ol { padding-left:18px; color:var(--text-sub); }
+.footnote li { margin-bottom:2px; }
+
+.page-number {
+  text-align:right; font-size:0.73em; color:var(--text-muted);
+  margin-top:7px; padding-top:5px; border-top:1px solid var(--border);
+}
+
+/* ── PRINT HEADER ── */
+.print-only-header { display:none; }
+.print-header-top { display:flex; justify-content:space-between; align-items:flex-start; gap:10px; }
+.print-header-center { text-align:center; flex:1; }
+.print-header-center h2 { font-size:1.15em; margin-bottom:2px; color:var(--jpj-blue); }
+.print-header-center p { font-size:0.78em; color:#444; margin:1px 0; }
+.print-header-right { text-align:right; font-size:0.74em; color:#333; }
+.print-header-left { font-size:0.74em; color:#555; }
+.print-meta-bar {
+  margin-top:7px; padding-top:5px; border-top:1px solid #ccc;
+  display:flex; justify-content:space-between; font-size:0.73em; color:#555;
+}
+.page-header-repeat { display:none; }
+.print-page { width:100%; }
+.footnote-screen-only { display:block; }
+.print-page .footnote { display:none; }
+
+/* ── PRINT MEDIA ── */
+@media print {
+  @page { size:landscape; margin:8mm; }
+
+  body { padding:0; background:white; margin:0; font-size:11px; }
+  .page-wrap { padding:0; max-width:100%; }
+
+  .input-section, .btn-container, .screen-header, .pindaan-bar,
+  .report-id-banner, .verdict-banner, .speedo-wrap { display:none !important; }
+
+  .page-header-repeat {
+    display:block !important;
+    border-bottom:2px solid var(--jpj-blue);
+    margin-bottom:12px; padding-bottom:8px;
+  }
+
+  #resultsArea { margin-top:0; }
+
+  .grid-col-1 { grid-template-columns:1fr; max-width:50%; }
+  .grid-col-2 { grid-template-columns:repeat(2,1fr); max-width:100%; }
+  .grid-col-3 { grid-template-columns:repeat(3,1fr); }
+  .grid-col-4 { grid-template-columns:repeat(2,1fr); max-width:100%; }
+
+  .page-break-before { page-break-before: always !important; }
+  /* Pastikan print-page TIDAK auto page-break kecuali yang ada .page-break-before */
+  .print-page { page-break-before: avoid; page-break-after: avoid; }
+  .print-page.page-break-before { page-break-before: always !important; }
+  .report-col { break-inside:avoid; border-radius:0; }
+  .report-col.pass { border-color:#1a7a3c !important; }
+  .report-col.fail { border-color:#c0392b !important; }
+
+  .footnote { background:white; border:1px solid #bbb; }
+  .print-page .footnote { display:block !important; }
+  .footnote-screen-only { display:none !important; }
+  .warning-box { display:none !important; }
+  /* Ulasan — skrin: textarea visible, garisan hidden. Print: terbalik */
+  .screen-only-ulasan { display:none !important; }
+  .ulasan-garisan { display:block !important; }
+  .ulasan-print-text {
+    display:block !important;
+    font-size:0.82em; color:var(--text); font-weight:600;
+    padding:4px 0; min-height:14px;
+    white-space:pre-wrap; word-wrap:break-word;
+  }
+}
+
+@media(max-width:768px) {
+  .grid-col-2, .grid-col-3, .grid-col-4 {
+    grid-template-columns:1fr !important; max-width:100% !important;
+  }
+  .btn-container { flex-direction:column; }
+  .btn { width:100%; justify-content:center; }
+}
+</style>
+</head>
+<body>
+
+<div class="page-wrap">
+
+  <!-- SCREEN HEADER -->
+  <header class="screen-header">
+    <div class="header-icon">🚛</div>
+    <div class="header-text">
+      <h1>Sistem Analisis Tayar Perdagangan (SATP)</h1>
+      <h2>Laporan Audit Teknikal · SOP Bilangan 1 Tahun 2026 &amp; Pindaan · Bahagian Kejuruteraan Automotif, JPJ Negeri Selangor</h2>
+    </div>
+    <div class="header-badge">SATP<br>2026<br>V5.0</div>
+  </header>
+
+  <!-- PINDAAN NOTICE -->
+  <div class="pindaan-bar">
+    ⚠ <strong>Pindaan SOP Berkuat Kuasa:</strong>
+    &nbsp;(1) Had beza diameter <strong>±7%</strong> &nbsp;|&nbsp;
+    (2) Nilai Aspek Ratio <strong>100%</strong> jika tidak dinyatakan pada dinding tayar &nbsp;|&nbsp;
+    (3) Formula BG 40%/60% terpakai untuk <strong>Decontrolled, Bas &amp; kenderaan tanpa data BG</strong>
+  </div>
+
+  <!-- PRINT ONLY HEADER -->
+  <div class="print-only-header" id="printHeaderMain">
+    <div class="print-header-top">
+      <div class="print-header-left">
+        <div>Copyright by MNK2026</div>
+        <div>Bahagian Kejuruteraan Automotif Negeri Selangor</div>
+      </div>
+      <div class="print-header-center">
+        <h2>SISTEM ANALISIS TAYAR PERDAGANGAN</h2>
+        <p>Laporan Audit Teknikal · SOP Bilangan 1 Tahun 2026 &amp; Pindaan</p>
+        <p id="print-mode-label" style="font-weight:800; color:#c0392b;"></p>
+      </div>
+      <div class="print-header-right">
+        <div id="print-date"></div>
+        <div id="print-time"></div>
+        <div id="print-bdm-header"></div>
+        <div id="print-ref-header" style="font-weight:700; color:#003366; margin-top:3px;"></div>
+      </div>
+    </div>
+    <div class="print-meta-bar">
+      <span>Dijana oleh sistem SATP 2026 V5.0 · Pindaan SOP: ±7% · AR=100%</span>
+      <span>Untuk Tujuan Semakan &amp; Rujukan Sahaja</span>
+    </div>
+  </div>
+
+  <!-- INPUT SECTION -->
+  <div class="input-section">
+
+    <!-- MAKLUMAT KENDERAAN -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-header-icon">🚗</div>
+        <h3>Maklumat Kenderaan</h3>
+      </div>
+      <div class="card-body">
+        <div class="form-grid-4" style="margin-bottom:12px;">
+          <div class="field">
+            <label class="field-label">No. Pendaftaran / No. Casis <span class="req">*</span></label>
+            <input type="text" id="veh_reg" placeholder="Cth: BDU1234" style="text-transform:uppercase;">
+          </div>
+          <div class="field">
+            <label class="field-label">Buatan <span class="req">*</span></label>
+            <input type="text" id="veh_make" placeholder="Cth: HINO, ISUZU">
+          </div>
+          <div class="field">
+            <label class="field-label">Model <span class="req">*</span></label>
+            <input type="text" id="veh_model" placeholder="Cth: 500 FC9JKKA">
+          </div>
+          <div class="field">
+            <label class="field-label">Jenis Badan <span class="req">*</span></label>
+            <input type="text" id="veh_body" placeholder="Cth: Box, Tipper, Bas">
+          </div>
+        </div>
+        <div class="form-grid-2">
+          <div class="field">
+            <label class="field-label">Nama Pegawai Penyemak <span class="req">*</span></label>
+            <input type="text" id="veh_pegawai" placeholder="Nama penuh pegawai penyemak">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MAKLUMAT TEKNIKAL -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-header-icon">⚙</div>
+        <h3>Maklumat Teknikal Kenderaan &amp; Gandar</h3>
+      </div>
+      <div class="card-body">
+
+        <div class="form-grid-2" style="margin-bottom:14px;">
+          <div class="field">
+            <label class="field-label">Mod Kenderaan</label>
+            <select id="sysMode" onchange="updateUI()">
+              <option value="heavy">LORI BERAT / TRELER</option>
+              <option value="decontrolled">DECONTROLLED (BDM ≤ 7,500 kg)</option>
+              <option value="bas">BAS (Formula BG Auto 40%/60%)</option>
+            </select>
+          </div>
+          <div class="field">
+            <label class="field-label">BDM Kenderaan (kg) <span class="req">*</span></label>
+            <input type="number" id="mainBDM" class="clr" placeholder="Cth: 26000" min="1" max="100000" oninput="onBdmInput()">
+            <span class="field-hint" id="bdmHint"></span>
+          </div>
+        </div>
+
+        <!-- Axle 2 type toggle — hanya untuk mod Bas -->
+        <div id="axle2TypeWrap" style="display:none; margin-bottom:12px;">
+          <div style="font-size:0.75em; font-weight:700; color:var(--text-sub); text-transform:uppercase; letter-spacing:0.05em; margin-bottom:6px;">
+            Konfigurasi Gandar Belakang (Gandar 2)
+          </div>
+          <div class="axle2-toggle">
+            <button type="button" class="toggle-btn active" id="btn1axle" onclick="setAxle2Type('single')">
+              1 Axle
+            </button>
+            <button type="button" class="toggle-btn" id="btn2axle" onclick="setAxle2Type('double')">
+              2 Axle (Tandem)
+            </button>
+            <span style="font-size:0.75em; color:var(--text-muted); margin-left:4px;">BG gandar 2 = 60% BDM (untuk kedua-dua axle)</span>
+          </div>
+        </div>
+
+        <div id="axleInputGrid"></div>
+
+        <div class="btn-container">
+          <button class="btn btn-main" onclick="runAnalysis()">▶ Jana Analisis &amp; Keputusan</button>
+          <button class="btn btn-reset" onclick="resetAll()">↺ Reset Sistem</button>
+          <button class="btn btn-print" id="btnPrint" onclick="window.print()">🖨 Cetak Laporan (PDF)</button>
+        </div>
+
+      </div>
+    </div>
+
+  </div><!-- end input-section -->
+
+  <div id="resultsArea"></div>
+
+</div><!-- end page-wrap -->
+
+<script>
+'use strict';
+
+/* ── CONSTANTS ── */
+const DIAM_TOLERANCE = 7.0;
+const DEFAULT_AR     = 100;
+const LI_MIN         = 52;
+const LI_MAX         = 270;
+
+/* ── LI DATABASE LI 0–270 ── */
+const LI_DATABASE = {
+  0:45, 1:46.2, 2:47.5, 3:48.7, 4:50, 5:51.5,
+  6:53, 7:54.5, 8:56, 9:58, 10:60,
+  11:61.5,12:63,13:65,14:67,15:69,16:71,17:73,18:75,19:77.5,20:80,
+  21:82.5,22:85,23:87.5,24:90,25:92.5,26:95,27:97.5,28:100,29:103,30:106,
+  31:109,32:112,33:115,34:118,35:121,36:125,37:128,38:132,39:136,40:140,
+  41:145,42:150,43:155,44:160,45:165,46:170,47:175,48:180,49:185,50:190,
+  51:195,52:200,53:206,54:212,55:218,56:224,57:230,58:236,59:243,60:250,
+  61:257,62:265,63:272,64:280,65:290,66:300,67:307,68:315,69:325,70:335,
+  71:345,72:355,73:365,74:375,75:387,76:400,77:412,78:425,79:437,80:450,
+  81:462,82:475,83:487,84:500,85:515,86:530,87:545,88:560,89:580,90:600,
+  91:615,92:630,93:650,94:670,95:690,96:710,97:730,98:750,99:775,100:800,
+  101:825,102:850,103:875,104:900,105:925,106:950,107:975,108:1000,109:1030,110:1060,
+  111:1090,112:1120,113:1150,114:1180,115:1215,116:1250,117:1285,118:1320,119:1360,120:1400,
+  121:1450,122:1500,123:1550,124:1600,125:1650,126:1700,127:1750,128:1800,129:1850,130:1900,
+  131:1950,132:2000,133:2060,134:2120,135:2180,136:2240,137:2300,138:2360,139:2430,140:2500,
+  141:2575,142:2650,143:2725,144:2800,145:2900,146:3000,147:3075,148:3150,149:3250,150:3350,
+  151:3450,152:3550,153:3650,154:3750,155:3875,156:4000,157:4125,158:4250,159:4375,160:4500,
+  161:4625,162:4750,163:4875,164:5000,165:5150,166:5300,167:5450,168:5600,169:5800,170:6000,
+  171:6150,172:6300,173:6500,174:6700,175:6900,176:7100,177:7300,178:7500,179:7750,180:8000,
+  181:8250,182:8500,183:8750,184:9000,185:9250,186:9500,187:9750,188:10000,189:10300,190:10600,
+  191:10900,192:11200,193:11500,194:11800,195:12150,196:12500,197:12850,198:13200,199:13600,200:14000,
+  201:14500,202:15000,203:15500,204:16000,205:16500,206:17000,207:17500,208:18000,209:18500,210:19000,
+  211:19500,212:20000,213:20600,214:21200,215:21800,216:22400,217:23000,218:23600,219:24300,220:25000,
+  221:25750,222:26500,223:27250,224:28000,225:29000,226:30000,227:30750,228:31500,229:32500,230:33500,
+  231:34500,232:35500,233:36500,234:37500,235:38750,236:40000,237:41250,238:42500,239:43750,240:45000,
+  241:46250,242:47500,243:48750,244:50000,245:51500,246:53000,247:54500,248:56000,249:58000,250:60000,
+  251:61500,252:63000,253:65000,254:67000,255:69000,256:71000,257:73000,258:75000,259:77500,260:80000,
+  261:82500,262:85000,263:87500,264:90000,265:92500,266:95000,267:97500,268:100000,269:103000,270:106000
+};
+
+/* ── HTML SANITASI (elak XSS) ── */
+function esc(str) {
+  const d = document.createElement('div');
+  d.textContent = str;
+  return d.innerHTML;
+}
+
+/* ── STATE PREFIX (boleh tukar ikut negeri) ── */
+const STATE_PREFIX = 'SEL';
+
+function getLICapacity(li) {
+  const n = parseInt(li);
+  if (isNaN(n) || n < LI_MIN || n > LI_MAX) return null;
+  return LI_DATABASE[n] !== undefined ? LI_DATABASE[n] : null;
+}
+
+/* ── AXLE 2 TYPE STATE (untuk mod Bas) ── */
+let axle2Type = 'single'; // 'single' atau 'double'
+
+function setAxle2Type(type) {
+  axle2Type = type;
+  document.getElementById('btn1axle').classList.toggle('active', type === 'single');
+  document.getElementById('btn2axle').classList.toggle('active', type === 'double');
+  renderAxle2(type);
+}
+
+/* ── RENDER AXLE 2 ── */
+function renderAxle2(type) {
+  const box = document.getElementById('axlebox_2');
+  if (!box) return;
+
+  const isBas      = document.getElementById('sysMode').value === 'bas';
+  const bdm        = parseFloat(document.getElementById('mainBDM').value) || 0;
+  const bgAutoVal  = bdm > 0 ? (bdm * 0.6).toFixed(0) : '';
+
+  if (type === 'double' && isBas) {
+    box.querySelector('.axle-body').innerHTML = buildDoubleAxle2Body(bgAutoVal);
+  } else {
+    box.querySelector('.axle-body').innerHTML = buildSingleAxleBody(2, bdm, true);
+  }
+}
+
+/* ── BINA HTML UNTUK AXLE BODY STANDARD ── */
+function buildSingleAxleBody(i, bdm, isAutoMode) {
+  const bgAutoVal = bdm > 0 ? (isAutoMode ? (i === 1 ? bdm * 0.4 : bdm * 0.6).toFixed(0) : '') : '';
+  const bgReadonly = isAutoMode ? 'readonly' : '';
+  const bgPlaceholder = isAutoMode ? (i === 1 ? 'Auto (BDM × 40%)' : 'Auto (BDM × 60%)') : 'BG (kg)';
+  const bgVal = isAutoMode && bdm > 0 ? `value="${bgAutoVal}"` : '';
+
+  return `
+    <div class="field">
+      <label class="field-label">No. Gandar <span class="req">*</span></label>
+      <input type="number" id="g_num_${i}" class="clr" placeholder="Cth: ${i}" min="1" max="20">
+    </div>
+    <div class="section-divider">Tayar Asal</div>
+    <div class="field">
+      <label class="field-label">Lebar / Nisbah / RIM</label>
+      <div class="input-row-3">
+        <input type="number" step="0.01" id="w1_${i}" class="clr" placeholder="mm / inci" min="1">
+        <input type="number" id="r1_${i}" class="clr" placeholder="Nisbah">
+        <input type="number" step="0.5" id="rim1_${i}" class="clr" placeholder="RIM" min="1">
+      </div>
+      <span class="field-hint">Lebar: mm (cth: 295) atau inci (cth: 10.00) · Nisbah kosong = ${DEFAULT_AR}%</span>
+    </div>
+    <div class="section-divider">Tayar Baru (Alternatif)</div>
+    <div class="field">
+      <label class="field-label">Lebar / Nisbah / RIM</label>
+      <div class="input-row-3">
+        <input type="number" step="0.01" id="w2_${i}" class="clr" placeholder="mm / inci" min="1">
+        <input type="number" id="r2_${i}" class="clr" placeholder="Nisbah">
+        <input type="number" step="0.5" id="rim2_${i}" class="clr" placeholder="RIM" min="1">
+      </div>
+    </div>
+    <div class="section-divider">Load Index &amp; Konfigurasi</div>
+    <div class="field">
+      <label class="field-label">Load Index Tayar Asal — Single / Dual</label>
+      <div class="input-row-2">
+        <input type="number" id="li1s_${i}" class="clr" placeholder="LI Asal Single" min="${LI_MIN}" max="${LI_MAX}">
+        <input type="number" id="li1d_${i}" class="clr" placeholder="LI Asal Dual" min="${LI_MIN}" max="${LI_MAX}">
+      </div>
+      <span class="field-hint">Jika ada — untuk rujukan perbandingan</span>
+    </div>
+    <div class="field">
+      <label class="field-label">Load Index Tayar Baru — Single / Dual <span class="req">*</span></label>
+      <div class="input-row-2">
+        <input type="number" id="li2s_${i}" class="clr" placeholder="LI Baru Single" min="${LI_MIN}" max="${LI_MAX}">
+        <input type="number" id="li2d_${i}" class="clr" placeholder="LI Baru Dual" min="${LI_MIN}" max="${LI_MAX}">
+      </div>
+      <span class="field-hint">Julat sah JPJ: LI ${LI_MIN}–${LI_MAX}</span>
+    </div>
+    <div class="field">
+      <label class="field-label">Konfigurasi Tayar</label>
+      <select id="conf_${i}">
+        <option value="single" ${i === 1 ? 'selected' : ''}>Single / Tunggal (2 tayar/gandar)</option>
+        <option value="dual" ${i !== 1 ? 'selected' : ''}>Dual / Berkembar (4 tayar/gandar)</option>
+      </select>
+    </div>
+    <div class="field">
+      <label class="field-label">Berat Gandar / BG (kg)</label>
+      <input type="number" id="bg_${i}" class="clr" placeholder="${bgPlaceholder}" ${bgVal} ${bgReadonly} min="1" max="60000">
+    </div>`;
+}
+
+/* ── BINA HTML UNTUK AXLE 2 — 2 AXLE TANDEM (untuk Bas) ── */
+function buildDoubleAxle2Body(bgAutoVal) {
+  const bgDisplay = bgAutoVal ? bgAutoVal : '';
+  return `
+    <div class="field">
+      <label class="field-label">No. Gandar <span class="req">*</span></label>
+      <input type="number" id="g_num_2" class="clr" placeholder="Cth: 2" min="1" max="20">
+    </div>
+    <div class="section-divider">Gandar 2A (Axle Pertama)</div>
+    <div class="sub-axle-block">
+      <div class="sub-axle-label">⬡ Axle 2A</div>
+      <div class="field" style="margin-bottom:7px;">
+        <label class="field-label">Tayar Asal — Lebar / Nisbah / RIM</label>
+        <div class="input-row-3">
+          <input type="number" step="0.01" id="w1_2a" class="clr" placeholder="mm / inci">
+          <input type="number" id="r1_2a" class="clr" placeholder="Nisbah">
+          <input type="number" step="0.5" id="rim1_2a" class="clr" placeholder="RIM">
+        </div>
+      </div>
+      <div class="field" style="margin-bottom:7px;">
+        <label class="field-label">Tayar Baru — Lebar / Nisbah / RIM</label>
+        <div class="input-row-3">
+          <input type="number" step="0.01" id="w2_2a" class="clr" placeholder="mm / inci">
+          <input type="number" id="r2_2a" class="clr" placeholder="Nisbah">
+          <input type="number" step="0.5" id="rim2_2a" class="clr" placeholder="RIM">
+        </div>
+      </div>
+      <div class="field" style="margin-bottom:7px;">
+        <label class="field-label">Load Index Tayar Asal — Single / Dual</label>
+        <div class="input-row-2">
+          <input type="number" id="li1s_2a" class="clr" placeholder="LI Asal Single" min="${LI_MIN}" max="${LI_MAX}">
+          <input type="number" id="li1d_2a" class="clr" placeholder="LI Asal Dual" min="${LI_MIN}" max="${LI_MAX}">
+        </div>
+        <span class="field-hint">Jika ada — untuk rujukan perbandingan</span>
+      </div>
+      <div class="field" style="margin-bottom:7px;">
+        <label class="field-label">Load Index Tayar Baru — Single / Dual <span class="req">*</span></label>
+        <div class="input-row-2">
+          <input type="number" id="li2s_2a" class="clr" placeholder="LI Baru Single" min="${LI_MIN}" max="${LI_MAX}">
+          <input type="number" id="li2d_2a" class="clr" placeholder="LI Baru Dual" min="${LI_MIN}" max="${LI_MAX}">
+        </div>
+      </div>
+      <div class="field">
+        <label class="field-label">Konfigurasi Tayar</label>
+        <select id="conf_2a">
+          <option value="single">Single / Tunggal (2 tayar)</option>
+          <option value="dual" selected>Dual / Berkembar (4 tayar)</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="section-divider">Gandar 2B (Axle Kedua)</div>
+    <div class="sub-axle-block">
+      <div class="sub-axle-label">⬡ Axle 2B</div>
+      <div class="field" style="margin-bottom:7px;">
+        <label class="field-label">Tayar Asal — Lebar / Nisbah / RIM</label>
+        <div class="input-row-3">
+          <input type="number" step="0.01" id="w1_2b" class="clr" placeholder="mm / inci">
+          <input type="number" id="r1_2b" class="clr" placeholder="Nisbah">
+          <input type="number" step="0.5" id="rim1_2b" class="clr" placeholder="RIM">
+        </div>
+      </div>
+      <div class="field" style="margin-bottom:7px;">
+        <label class="field-label">Tayar Baru — Lebar / Nisbah / RIM</label>
+        <div class="input-row-3">
+          <input type="number" step="0.01" id="w2_2b" class="clr" placeholder="mm / inci">
+          <input type="number" id="r2_2b" class="clr" placeholder="Nisbah">
+          <input type="number" step="0.5" id="rim2_2b" class="clr" placeholder="RIM">
+        </div>
+      </div>
+      <div class="field" style="margin-bottom:7px;">
+        <label class="field-label">Load Index Tayar Asal — Single / Dual</label>
+        <div class="input-row-2">
+          <input type="number" id="li1s_2b" class="clr" placeholder="LI Asal Single" min="${LI_MIN}" max="${LI_MAX}">
+          <input type="number" id="li1d_2b" class="clr" placeholder="LI Asal Dual" min="${LI_MIN}" max="${LI_MAX}">
+        </div>
+        <span class="field-hint">Jika ada — untuk rujukan perbandingan</span>
+      </div>
+      <div class="field" style="margin-bottom:7px;">
+        <label class="field-label">Load Index Tayar Baru — Single / Dual <span class="req">*</span></label>
+        <div class="input-row-2">
+          <input type="number" id="li2s_2b" class="clr" placeholder="LI Baru Single" min="${LI_MIN}" max="${LI_MAX}">
+          <input type="number" id="li2d_2b" class="clr" placeholder="LI Baru Dual" min="${LI_MIN}" max="${LI_MAX}">
+        </div>
+      </div>
+      <div class="field">
+        <label class="field-label">Konfigurasi Tayar</label>
+        <select id="conf_2b">
+          <option value="single">Single / Tunggal (2 tayar)</option>
+          <option value="dual" selected>Dual / Berkembar (4 tayar)</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="field" style="margin-top:6px;">
+      <label class="field-label">Berat Gandar (BG) — Keseluruhan Gandar 2 (60% BDM)</label>
+      <input type="number" id="bg_2" class="clr" value="${bgDisplay}"
+             placeholder="Auto (BDM × 60%)" readonly min="1" max="60000">
+      <span class="field-hint">BG 60% dikongsi antara Axle 2A dan 2B — setiap axle semak secara berasingan</span>
+    </div>`;
+}
+
+/* ── GENERATE REPORT ID ── */
+function generateReportId() {
+  const now  = new Date();
+  const Y    = now.getFullYear();
+  const M    = String(now.getMonth()+1).padStart(2,'0');
+  const D    = String(now.getDate()).padStart(2,'0');
+  const HH   = String(now.getHours()).padStart(2,'0');
+  const MM   = String(now.getMinutes()).padStart(2,'0');
+  const SS   = String(now.getSeconds()).padStart(2,'0');
+  const rand = Math.floor(1000 + Math.random()*9000);
+  return `SATP-${STATE_PREFIX}-${Y}${M}${D}-${HH}${MM}${SS}-${rand}`;
+}
+
+/* ── KIRA DIAMETER ──
+   Sokong 2 format tayar:
+   1) Metrik mm  : 295/80 R22.5  → lebar dalam mm (w ≥ 30)
+   2) Inci       : 10.00 R 20    → lebar dalam inci (w < 30), convert ke mm (* 25.4)
+      Contoh lain: 7.50 R 16, 11.00 R 20, 12.00 R 24
+   Nota: had < 30 dipilih kerana tayar inci paling besar ~24 inci
+         dan tayar metrik paling kecil ~125 mm
+   ── */
+function calcD(w, r, rim) {
+  if (!w || !rim) return 0;
+  const wNum    = parseFloat(w);
+  const rimNum  = parseFloat(rim);
+  // Inci jika lebar < 30 (contoh: 10.00, 7.50, 12.00)
+  const widthMm = (wNum < 30) ? wNum * 25.4 : wNum;
+  const ratio   = (r > 0 && !isNaN(r)) ? parseFloat(r) : DEFAULT_AR;
+  const rimMm   = rimNum * 25.4;
+  return 2 * (widthMm * ratio / 100) + rimMm;
+}
+
+function isInchTyre(w) {
+  return parseFloat(w) < 30;
+}
+
+function formatTire(w, r, rim) {
+  if (!w) return '—';
+  if (isInchTyre(w)) {
+    // Format inci: 10.00 R 20 (tanpa nisbah) atau 10.00/80 R 20 (dengan nisbah)
+    const rDisplay = (r && parseFloat(r) !== DEFAULT_AR) ? `/${r}` : '';
+    return `${parseFloat(w).toFixed(2)}${rDisplay} R ${rim}`;
+  }
+  // Format metrik: 295/80R22.5
+  return r ? `${w}/${r}R${rim}` : `${w}R${rim}`;
+}
+
+/* ── GET VEHICLE INFO ── */
+function getVehicleInfo() {
+  return {
+    reg:     (document.getElementById('veh_reg').value     || '').toUpperCase().trim(),
+    make:    (document.getElementById('veh_make').value    || '').toUpperCase().trim(),
+    model:   (document.getElementById('veh_model').value   || '').toUpperCase().trim(),
+    body:    (document.getElementById('veh_body').value    || '').trim(),
+    pegawai: (document.getElementById('veh_pegawai').value || '').trim(),
+  };
+}
+
+/* ── INIT AXLE BOXES ── */
+function initInputs() {
+  const grid = document.getElementById('axleInputGrid');
+  grid.innerHTML = '';
+  for (let i = 1; i <= 4; i++) {
+    const titleEl = `<div class="axle-title"><span class="axle-title-num">${i}</span> Maklumat Gandar ${i}</div>`;
+    const bodyEl  = `<div class="axle-body" id="axlebody_${i}">${buildSingleAxleBody(i, 0, false)}</div>`;
+    grid.innerHTML += `<div class="axle-box" id="axlebox_${i}">${titleEl}${bodyEl}</div>`;
+  }
+  axle2Type = 'single';
+}
+
+/* ── ON BDM INPUT ── */
+function onBdmInput() {
+  const mode  = document.getElementById('sysMode').value;
+  const bdm   = parseFloat(document.getElementById('mainBDM').value) || 0;
+  const hint  = document.getElementById('bdmHint');
+  const bdmEl = document.getElementById('mainBDM');
+
+  bdmEl.classList.remove('invalid');
+
+  if (bdm < 0) {
+    bdmEl.classList.add('invalid');
+    hint.textContent = '⚠ BDM tidak boleh negatif.';
+    hint.className = 'field-hint warn'; return;
+  }
+  if (mode === 'decontrolled' && bdm > 7500) {
+    bdmEl.classList.add('invalid');
+    hint.textContent = '⚠ Decontrolled: BDM maksimum 7,500 kg.';
+    hint.className = 'field-hint warn';
+  } else { hint.textContent = ''; hint.className = 'field-hint'; }
+
+  if (mode === 'decontrolled' || mode === 'bas') {
+    autoFillBG(bdm, mode);
+  }
+}
+
+function autoFillBG(bdm, mode) {
+  for (let i = 1; i <= 2; i++) {
+    const bgField = document.getElementById(`bg_${i}`);
+    if (!bgField) continue;
+    const pct   = (i === 1) ? 0.4 : 0.6;
+    const label = (i === 1) ? '40%' : '60%';
+    bgField.value       = bdm > 0 ? (bdm * pct).toFixed(0) : '';
+    bgField.readOnly    = true;
+    bgField.placeholder = `Auto (BDM × ${label})`;
+  }
+}
+
+/* ── UPDATE UI ── */
+function updateUI() {
+  const mode       = document.getElementById('sysMode').value;
+  const isAutoMode = (mode === 'decontrolled' || mode === 'bas');
+  const isBas      = mode === 'bas';
+  const bdm        = parseFloat(document.getElementById('mainBDM').value) || 0;
+  const hint       = document.getElementById('bdmHint');
+  const bdmEl      = document.getElementById('mainBDM');
+
+  // Tunjuk/sembunyi gandar 3 & 4
+  for (let i = 3; i <= 4; i++) {
+    const box = document.getElementById(`axlebox_${i}`);
+    if (box) box.style.display = isAutoMode ? 'none' : '';
+  }
+
+  // Toggle axle2 type selector
+  const axle2TypeWrap = document.getElementById('axle2TypeWrap');
+  if (axle2TypeWrap) axle2TypeWrap.style.display = isBas ? 'block' : 'none';
+  if (!isBas) {
+    axle2Type = 'single';
+    document.getElementById('btn1axle').classList.add('active');
+    document.getElementById('btn2axle').classList.remove('active');
+  }
+
+  // ── Simpan state input sebelum rebuild ──
+  const savedState = {};
+  for (let i = 1; i <= 4; i++) {
+    const bodyEl = document.getElementById(`axlebody_${i}`);
+    if (!bodyEl) continue;
+    const inputs = bodyEl.querySelectorAll('input, select');
+    inputs.forEach(inp => { if (inp.id) savedState[inp.id] = inp.value; });
+  }
+
+  // Re-render axle bodies untuk handle mode switch
+  for (let i = 1; i <= 4; i++) {
+    const bodyEl = document.getElementById(`axlebody_${i}`);
+    if (!bodyEl) continue;
+    const box = document.getElementById(`axlebox_${i}`);
+    if (box && box.style.display === 'none') continue;
+
+    if (i === 2 && isBas && axle2Type === 'double') {
+      const bgAutoVal = bdm > 0 ? (bdm * 0.6).toFixed(0) : '';
+      bodyEl.innerHTML = buildDoubleAxle2Body(bgAutoVal);
+    } else {
+      bodyEl.innerHTML = buildSingleAxleBody(i, bdm, isAutoMode && i <= 2);
+    }
+  }
+
+  // ── Pulihkan state input selepas rebuild ──
+  for (const [id, val] of Object.entries(savedState)) {
+    const el = document.getElementById(id);
+    if (!el) continue;
+    if (el.readOnly) continue; // jangan overwrite field auto-fill (BG readonly)
+    el.value = val;
+  }
+
+  // BDM validation
+  bdmEl.classList.remove('invalid');
+  if (mode === 'decontrolled') {
+    hint.textContent = 'Had: ≤ 7,500 kg untuk Decontrolled.';
+    hint.className = 'field-hint'; bdmEl.max = 7500;
+    if (bdm > 7500) {
+      bdmEl.classList.add('invalid');
+      hint.textContent = '⚠ BDM melebihi had Decontrolled.';
+      hint.className = 'field-hint warn';
+    }
+  } else if (mode === 'bas') {
+    hint.textContent = 'BG dikira automatik (40%/60% daripada BDM) — Pindaan SOP.';
+    hint.className = 'field-hint'; bdmEl.max = 100000;
+  } else {
+    hint.textContent = ''; hint.className = 'field-hint'; bdmEl.max = 100000;
+  }
+}
+
+/* ── HELPER: PROSES SATU AXLE ── */
+function processAxle(suffix, gNum, bdm, bg, warnings) {
+  /* suffix = '2', '2a', '2b', etc. */
+  const gLabel = `Gandar ${gNum}${suffix === '2a' ? 'A' : suffix === '2b' ? 'B' : ''}`;
+
+  const w1raw  = (document.getElementById(`w1_${suffix}`)?.value || '').trim();
+  const w1     = parseFloat(w1raw);
+  if (!w1 || w1 <= 0) return null;
+
+  // Validate lebar — sokong metrik (mm) dan inci
+  // Tayar inci jika w < 30 (cth: 10.00, 7.50, 11.00), tayar metrik jika w >= 30
+  const w1mm = (w1 < 30) ? w1 * 25.4 : w1;
+  if (w1mm < 127 || w1mm > 610)
+    warnings.push(`${gLabel}: Lebar tayar (${w1}${w1 < 30 ? '"' : ' mm'}) luar julat lazim — semak semula.`);
+
+  const r1raw  = (document.getElementById(`r1_${suffix}`)?.value || '').trim();
+  const rim1raw= (document.getElementById(`rim1_${suffix}`)?.value || '').trim();
+  const r1     = parseFloat(r1raw)  || DEFAULT_AR;
+  const rim1   = parseFloat(rim1raw);
+
+  if (isNaN(rim1) || rim1 <= 0) {
+    warnings.push(`${gLabel}: RIM tayar asal tidak diisi — dilangkau.`); return null;
+  }
+
+  const w2raw   = (document.getElementById(`w2_${suffix}`)?.value || '').trim();
+  const r2raw   = (document.getElementById(`r2_${suffix}`)?.value || '').trim();
+  const rim2raw = (document.getElementById(`rim2_${suffix}`)?.value || '').trim();
+
+  // ── VALIDASI TAYAR BARU — cegah silent fallback ──
+  const w2filled   = w2raw !== '';
+  const rim2filled = rim2raw !== '';
+  const r2filled   = r2raw !== '';
+
+  // Kes 1: Semua kosong — tayar baru = tayar asal (tiada perubahan)
+  // Kes 2: Semua diisi — OK
+  // Kes 3: Separa diisi — AMARAN KERAS, beritahu pengguna apa yang berlaku
+  if (w2filled && !rim2filled) {
+    warnings.push(`⚠ ${gLabel}: Lebar tayar baru diisi tetapi RIM tidak diisi — sistem guna RIM asal (${rim1}). Sila semak.`);
+  }
+  if (!w2filled && rim2filled) {
+    warnings.push(`⚠ ${gLabel}: RIM tayar baru diisi tetapi Lebar tidak diisi — sistem guna Lebar asal (${w1}). Sila semak.`);
+  }
+
+  const w2   = parseFloat(w2raw)   || w1;
+  const r2   = parseFloat(r2raw)   || r1;
+  const rim2 = parseFloat(rim2raw) || rim1;
+
+  const d1 = calcD(w1, r1, rim1);
+  const d2 = calcD(w2, r2, rim2);
+
+  if (d1 <= 0) { warnings.push(`${gLabel}: Tidak dapat mengira diameter tayar asal.`); return null; }
+
+  const diff = ((d2 - d1) / d1) * 100;
+
+  const confEl  = document.getElementById(`conf_${suffix}`);
+  const conf    = confEl ? confEl.value : 'dual';
+  const tyreCount = conf === 'dual' ? 4 : 2;
+
+  // ── LI TAYAR ASAL ──
+  const liRawOri   = conf === 'dual'
+    ? parseInt(document.getElementById(`li1d_${suffix}`)?.value || '')
+    : parseInt(document.getElementById(`li1s_${suffix}`)?.value || '');
+  const liPerTyreOri = getLICapacity(liRawOri);
+  let capOri = 0, liErrorOri = false;
+
+  if (liPerTyreOri === null) {
+    liErrorOri = true;
+    warnings.push(`${gLabel}: Load Index tayar asal tidak diisi — kapasiti asal tidak dapat dikira.`);
+  } else {
+    capOri = liPerTyreOri * tyreCount;
+    if (capOri < bg) {
+      warnings.push(`${gLabel}: Kapasiti tayar asal (${capOri.toLocaleString()} kg) kurang daripada BG (${Math.round(bg).toLocaleString()} kg).`);
+    }
+  }
+
+  // ── LI TAYAR BARU ──
+  const liRaw   = conf === 'dual'
+    ? parseInt(document.getElementById(`li2d_${suffix}`)?.value || '')
+    : parseInt(document.getElementById(`li2s_${suffix}`)?.value || '');
+
+  const liPerTyre = getLICapacity(liRaw);
+  let cap = 0, liError = false;
+
+  if (liPerTyre === null) {
+    liError = true;
+    const liMsg = isNaN(liRaw) ? 'tidak diisi' : `${liRaw} (luar julat sah ${LI_MIN}–${LI_MAX})`;
+    warnings.push(`${gLabel}: Load Index tayar baru ${liMsg} — kapasiti tidak dapat dikira.`);
+  } else {
+    cap = liPerTyre * tyreCount;
+  }
+
+  const diamOk = Math.abs(diff) <= DIAM_TOLERANCE;
+  const capOk  = !liError && cap >= bg;
+  const isPass = diamOk && capOk && !liError;
+
+  // Speedometer (skrin sahaja)
+  const speedoRows = [80, 90, 100, 110, 120].map(s => {
+    const real  = (d2 / d1 * s).toFixed(1);
+    const delta = (d2 / d1 * s - s).toFixed(1);
+    const cls   = Math.abs(d2 / d1 * s - s) > 5 ? 'val-fail' : '';
+    return `<tr>
+      <td>${s} km/j</td>
+      <td class="val-bold ${cls}">${real} km/j</td>
+      <td style="color:var(--text-muted);font-size:0.9em;">${parseFloat(delta)>0?'+':''}${delta}</td>
+    </tr>`;
+  }).join('');
+
+  return {
+    gNum: suffix === '2a' ? `${gNum}A` : suffix === '2b' ? `${gNum}B` : gNum,
+    isPass, bdm, bg, w1, r1, rim1, w2, r2, rim2,
+    d1, d2, cap, diff, diamOk, capOk, conf,
+    speedoRows, liError, liRaw, liPerTyre,
+    capOri, liRawOri, liPerTyreOri, liErrorOri
+  };
+}
+
+/* ── JANA ANALISIS ── */
+function runAnalysis() {
+  const mode    = document.getElementById('sysMode').value;
+  const bdmEl   = document.getElementById('mainBDM');
+  const bdm     = parseFloat(bdmEl.value) || 0;
+  const resArea = document.getElementById('resultsArea');
+  const veh     = getVehicleInfo();
+  resArea.innerHTML = '';
+
+  // ── Validate mandatory fields kenderaan ──
+  const mandatoryFields = [
+    { id: 'veh_reg',     label: 'No. Pendaftaran / No. Casis' },
+    { id: 'veh_make',    label: 'Buatan' },
+    { id: 'veh_model',   label: 'Model' },
+    { id: 'veh_body',    label: 'Jenis Badan' },
+    { id: 'veh_pegawai', label: 'Nama Pegawai Penyemak' },
+  ];
+  let missingFields = [];
+  mandatoryFields.forEach(f => {
+    const el = document.getElementById(f.id);
+    if (!el) return;
+    const empty = !el.value.trim();
+    el.classList.toggle('invalid', empty);
+    if (empty) missingFields.push(f.label);
+  });
+  if (missingFields.length > 0) {
+    showAlert('Sila lengkapkan Maklumat Kenderaan: ' + missingFields.join(', '));
+    return;
+  }
+
+  bdmEl.classList.remove('invalid');
+  if (bdm <= 0) { bdmEl.classList.add('invalid'); showAlert('Sila masukkan BDM kenderaan yang sah (> 0 kg).'); return; }
+  if (mode === 'decontrolled' && bdm > 7500) { bdmEl.classList.add('invalid'); showAlert('BDM melebihi 7,500 kg untuk mod Decontrolled.'); return; }
+
+  const isAutoMode = (mode === 'decontrolled' || mode === 'bas');
+  const isBas      = mode === 'bas';
+  const axleCards  = [];
+  const warnings   = [];
+
+  for (let i = 1; i <= 4; i++) {
+    const box = document.getElementById(`axlebox_${i}`);
+    if (!box || box.style.display === 'none') continue;
+
+    const gNumEl = document.getElementById(`g_num_${i}`);
+    const gNum   = gNumEl ? gNumEl.value.trim() : '';
+    if (!gNum) continue;
+
+    // BG
+    let bg;
+    if (isAutoMode) {
+      bg = Math.round((i === 1) ? bdm * 0.4 : bdm * 0.6);
+    } else {
+      const bgEl = document.getElementById(`bg_${i}`);
+      bg = bgEl ? parseFloat(bgEl.value) : NaN;
+      if (isNaN(bg) || bg <= 0) {
+        warnings.push(`Gandar ${gNum}: BG tidak diisi — dilangkau.`); continue;
+      }
+      if (bg > bdm) warnings.push(`Gandar ${gNum}: BG (${bg.toLocaleString()} kg) melebihi BDM — semak semula.`);
+    }
+
+    // Gandar 2 Bas — 2 axle
+    if (i === 2 && isBas && axle2Type === 'double') {
+      const cardA = processAxle('2a', gNum, bdm, bg, warnings);
+      const cardB = processAxle('2b', gNum, bdm, bg, warnings);
+      if (cardA) axleCards.push(cardA);
+      if (cardB) axleCards.push(cardB);
+      continue;
+    }
+
+    // Standard single axle
+    const card = processAxle(String(i), gNum, bdm, bg, warnings);
+    if (card) axleCards.push(card);
+  }
+
+  // ── Semak gandar duplikat ──
+  const gNums = axleCards.map(c => String(c.gNum));
+  const seen  = new Set();
+  const dupes = new Set();
+  gNums.forEach(g => { if (seen.has(g)) dupes.add(g); seen.add(g); });
+  if (dupes.size > 0) {
+    warnings.push(`⚠ No. Gandar duplikat dikesan: ${[...dupes].join(', ')} — sila semak input.`);
+  }
+
+  if (axleCards.length === 0) {
+    resArea.innerHTML = `
+      <div style="text-align:center;padding:40px;color:var(--jpj-red);font-weight:700;">
+        ⚠ Tiada data gandar yang lengkap untuk dianalisis.<br>
+        <span style="font-weight:400;font-size:0.85em;color:var(--text-sub);">
+          Sila isi No. Gandar, Tayar Asal (Lebar + RIM) dan BDM.
+        </span>
+      </div>`; return;
+  }
+
+  const reportId  = generateReportId();
+  const now       = new Date();
+  const modeEl    = document.getElementById('sysMode');
+  const modeText  = modeEl.options[modeEl.selectedIndex].text;
+  const n         = axleCards.length;
+  const passCount = axleCards.filter(a => a.isPass).length;
+  const failCount = n - passCount;
+  const allPass   = failCount === 0;
+
+  document.getElementById('print-date').textContent       = 'Tarikh: ' + now.toLocaleDateString('ms-MY');
+  document.getElementById('print-time').textContent       = 'Masa: '   + now.toLocaleTimeString('ms-MY');
+  document.getElementById('print-bdm-header').textContent = 'BDM: '   + bdm.toLocaleString() + ' kg';
+  document.getElementById('print-mode-label').textContent = modeText;
+  document.getElementById('print-ref-header').textContent = 'Ref: '   + reportId;
+  document.getElementById('btnPrint').style.display       = 'flex';
+
+  // Grid class — ≤2 gandar: 2 col atau 1 col; 3 gandar: 3 col; 4+: 2 col (2 per page)
+  let gridClass = n === 1 ? 'grid-col-1' : n === 2 ? 'grid-col-2' : n === 3 ? 'grid-col-3' : 'grid-col-4';
+
+  function buildPrintHeader() {
+    return `
+      <div class="page-header-repeat">
+        <div class="print-header-top">
+          <div class="print-header-left">
+            <div>Copyright by MNK2026</div>
+            <div>Bahagian Kejuruteraan Automotif Negeri Selangor</div>
+          </div>
+          <div class="print-header-center">
+            <h2>SISTEM ANALISIS TAYAR PERDAGANGAN</h2>
+            <p>Laporan Audit Teknikal · SOP Bilangan 1 Tahun 2026 &amp; Pindaan</p>
+            <p style="font-weight:800;color:#c0392b;">${modeText}</p>
+          </div>
+          <div class="print-header-right">
+            <div>Tarikh: ${now.toLocaleDateString('ms-MY')}</div>
+            <div>Masa: ${now.toLocaleTimeString('ms-MY')}</div>
+            <div>BDM: ${bdm.toLocaleString()} kg</div>
+            <div style="font-weight:700;color:#003366;margin-top:2px;">Ref: ${reportId}</div>
+          </div>
+        </div>
+        <div class="print-meta-bar">
+          <span>Dijana oleh sistem SATP 2026</span>
+          <span>Untuk Tujuan Semakan &amp; Rujukan Sahaja</span>
+        </div>
+      </div>`;
+  }
+
+  let warningHtml = warnings.length > 0 ? `
+    <div class="warning-box">
+      <div class="warning-box-title">⚠ Amaran Sistem (${warnings.length} item)</div>
+      <ul>${warnings.map(w => `<li>${w}</li>`).join('')}</ul>
+    </div>` : '';
+
+  const verdictHtml = `
+    <div class="verdict-banner ${allPass ? 'verdict-all-pass' : 'verdict-has-fail'}">
+      <span class="verdict-icon">${allPass ? '✅' : '❌'}</span>
+      <div>
+        <div>${allPass ? 'SEMUA GANDAR LULUS' : `${failCount} DARIPADA ${n} GANDAR GAGAL`}</div>
+        <div class="verdict-detail">
+          ${passCount} lulus · ${failCount} gagal · Ref: ${reportId} ·
+          ${now.toLocaleDateString('ms-MY')} ${now.toLocaleTimeString('ms-MY')}
+        </div>
+      </div>
+    </div>`;
+
+  const bodyLabel    = veh.body    ? ` · ${esc(veh.body)}`    : '';
+  const regLabel     = veh.reg     ? ` · ${esc(veh.reg)}`     : '';
+  const pegawaiLabel = veh.pegawai ? ` · Pegawai: ${esc(veh.pegawai)}` : '';
+
+  const reportIdHtml = `
+    <div class="report-id-banner">
+      <span class="report-id-main">📋 ${reportId}</span>
+      <div class="report-id-meta">
+        <span>🕐 ${now.toLocaleDateString('ms-MY')} ${now.toLocaleTimeString('ms-MY')}</span>
+        <span>🚛 ${modeText}${bodyLabel}${regLabel}</span>
+        <span>⚖ BDM: ${bdm.toLocaleString()} kg</span>
+        <span>📊 ${n} Gandar</span>
+        <span>📐 ±${DIAM_TOLERANCE}%</span>
+      </div>
+    </div>`;
+
+  const footnotePrint  = buildFootnote(reportId, now, modeText, bdm, veh, false);
+  const footnoteScreen = buildFootnote(reportId, now, modeText, bdm, veh, true);
+
+  let finalHtml = warningHtml + verdictHtml + reportIdHtml;
+
+  // ─── LAYOUT PELAPORAN ───
+  // Peraturan:
+  //   ≤ 3 gandar  → SATU page sahaja (semua dalam satu print-page div, tiada page break)
+  //   ≥ 4 gandar  → 2 per page, setiap page ada header + footnote + nombor page
+  if (n >= 4) {
+    const perPage    = 2;
+    const totalPages = Math.ceil(n / perPage);
+    for (let p = 0; p < totalPages; p++) {
+      const slice   = axleCards.slice(p * perPage, (p + 1) * perPage);
+      const cards   = slice.map(a => buildCard(a, modeText, veh)).join('');
+      const pgClass = p > 0 ? 'print-page page-break-before' : 'print-page';
+      finalHtml += `
+        <div class="${pgClass}">
+          ${buildPrintHeader()}
+          <div class="results-grid grid-col-2">${cards}</div>
+          ${footnotePrint}
+          <div class="page-number">Halaman ${p + 1} / ${totalPages}</div>
+        </div>`;
+    }
+    finalHtml += footnoteScreen;
+  } else {
+    // 1, 2 atau 3 gandar → satu print-page, tiada page-break-before sama sekali
+    const allCards = axleCards.map(a => buildCard(a, modeText, veh)).join('');
+    finalHtml += `
+      <div class="print-page" style="page-break-before:avoid; page-break-after:avoid;">
+        ${buildPrintHeader()}
+        <div class="results-grid ${gridClass}">${allCards}</div>
+        ${footnotePrint}
+        <div class="page-number">Halaman 1 / 1</div>
+      </div>
+      ${footnoteScreen}`;
+  }
+
+  resArea.innerHTML = finalHtml;
+  resArea.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+/* ── BUILD REPORT CARD ── */
+function buildCard(a, modeText, veh) {
+  // Kapasiti tayar BARU
+  const capDisplay = a.liError
+    ? `<span class="val-fail">✘ LI ${isNaN(a.liRaw) ? 'tidak diisi' : a.liRaw + ' (luar julat)'}</span>`
+    : `<span class="${a.capOk ? 'val-pass' : 'val-fail'}">
+        ${a.cap.toLocaleString()} kg &nbsp; ${a.capOk ? '✔ Mencukupi' : '✘ Tidak Mencukupi'}
+       </span>`;
+
+  const liLabel = a.liError ? '—'
+    : `LI ${a.liRaw} → ${a.liPerTyre ? a.liPerTyre.toLocaleString() : '—'} kg/tayar`;
+
+  // Kapasiti tayar ASAL
+  const capOriDisplay = a.liErrorOri
+    ? `<span style="color:var(--text-muted);">LI tidak diisi</span>`
+    : `<span class="${a.capOri >= a.bg ? 'val-pass' : 'val-fail'}">
+        ${a.capOri.toLocaleString()} kg &nbsp; ${a.capOri >= a.bg ? '✔' : '✘ Kurang BG'}
+       </span>`;
+
+  const liLabelOri = a.liErrorOri ? '—'
+    : `LI ${a.liRawOri} → ${a.liPerTyreOri ? a.liPerTyreOri.toLocaleString() : '—'} kg/tayar`;
+
+  const hasVehInfo = veh.reg || veh.make || veh.model || veh.body;
+  const vehInfoHtml = hasVehInfo ? `
+    <div class="veh-info-block">
+      ${veh.reg   ? `<span>No. Pendaftaran / Casis: <strong>${esc(veh.reg)}</strong></span>` : ''}
+      ${veh.make  ? `<span>Buatan: <strong>${esc(veh.make)}</strong></span>` : ''}
+      ${veh.model ? `<span>Model: <strong>${esc(veh.model)}</strong></span>` : ''}
+      ${veh.body  ? `<span>Jenis Badan: <strong>${esc(veh.body)}</strong></span>` : ''}
+    </div>` : '';
+
+  const diffSign    = a.diff >= 0 ? '+' : '';
+  const diffWarning = '';
+
+  // Speedometer — skrin sahaja, wrap akan hidden semasa print
+  const speedoHtml = `
+    <tr class="speedo-wrap">
+      <td colspan="2" style="padding:8px;">
+        <table class="speedo-table">
+          <tr><th colspan="3">📊 Anggaran Speedometer</th></tr>
+          <tr>
+            <th style="text-align:left;">Meter</th>
+            <th style="text-align:left;">Sebenar</th>
+            <th style="text-align:left;">Delta</th>
+          </tr>
+          ${a.speedoRows}
+        </table>
+      </td>
+    </tr>`;
+
+  // Ulasan pegawai — textarea input di skrin; garisan + nama pegawai dalam cetakan
+  const ulasanId    = `ulasan_${a.gNum}`;
+  const pegawaiHtml = `
+    <div class="ulasan-block">
+      <div class="ulasan-label">Ulasan Pegawai Penyemak</div>
+      <textarea class="ulasan-textarea screen-only-ulasan" id="${ulasanId}"
+        placeholder="Isi ulasan di sini (jika ada)..."
+        oninput="document.getElementById('ulasan_print_${a.gNum}').textContent=this.value"></textarea>
+      <div class="ulasan-print-text" id="ulasan_print_${a.gNum}"></div>
+      <div class="ulasan-garisan">
+        <div class="ulasan-line"></div>
+        <div class="ulasan-line"></div>
+      </div>
+      <div class="ulasan-pegawai-row">
+        ${veh.pegawai
+          ? `<span class="pegawai-stamp">Disemak oleh: ${esc(veh.pegawai)}</span>`
+          : `<span style="font-size:0.72em;color:var(--text-muted);">Tandatangan &amp; Cop Pegawai</span>`}
+      </div>
+    </div>`;
+
+  return `
+    <div class="report-col ${a.isPass ? 'pass' : 'fail'}">
+      <div class="status-header ${a.isPass ? 'pass-bg' : 'fail-bg'}">
+        <span>${a.isPass ? '✔' : '✘'}</span>
+        GANDAR ${a.gNum} — ${a.isPass ? 'LULUS' : 'GAGAL'}
+      </div>
+      ${vehInfoHtml}
+      <table>
+        <tr><th>Mod Kenderaan</th><td>${modeText}</td></tr>
+        <tr><th>BDM Kenderaan</th><td class="val-bold">${a.bdm.toLocaleString()} kg</td></tr>
+        <tr><th>Berat Gandar (BG)</th><td class="val-bold">${Math.round(a.bg).toLocaleString()} kg</td></tr>
+        <tr><th>Konfigurasi</th><td>${a.conf === 'dual' ? 'Dual / Berkembar (4 tayar)' : 'Single / Tunggal (2 tayar)'}</td></tr>
+        <tr><th>Tayar Asal</th><td class="val-bold">${formatTire(a.w1, a.r1, a.rim1)}</td></tr>
+        <tr><th>Tayar Baru</th><td class="val-bold">${formatTire(a.w2, a.r2, a.rim2)}</td></tr>
+        <tr><th>Diameter Asal</th><td class="val-bold">${a.d1.toFixed(1)} mm</td></tr>
+        <tr><th>Diameter Baru</th><td class="val-bold">${a.d2.toFixed(1)} mm</td></tr>
+        <tr>
+          <th>Beza Diameter</th>
+          <td class="val-bold ${a.diamOk ? 'val-pass' : 'val-fail'}">
+            ${diffSign}${a.diff.toFixed(2)}%
+            &nbsp; ${a.diamOk ? `✔ Dalam ±${DIAM_TOLERANCE}%` : `✘ Melebihi ±${DIAM_TOLERANCE}%`}
+            ${diffWarning}
+          </td>
+        </tr>
+        <tr><th>Load Index Asal</th><td style="font-size:0.76em;color:var(--text-sub);">${liLabelOri}</td></tr>
+        <tr><th>Kapasiti Tayar Asal</th><td class="val-bold">${capOriDisplay}</td></tr>
+        <tr><th>Load Index Baru</th><td style="font-size:0.76em;color:var(--text-sub);">${liLabel}</td></tr>
+        <tr><th>Kapasiti Tayar Baru</th><td class="val-bold">${capDisplay}</td></tr>
+        <tr>
+          <th>Status JPJ</th>
+          <td><span class="badge ${a.isPass ? 'badge-pass' : 'badge-fail'}">
+            ${a.isPass ? '✔ PATUH' : '✘ TIDAK PATUH'}
+          </span></td>
+        </tr>
+        ${speedoHtml}
+      </table>
+      ${pegawaiHtml}
+    </div>`;
+}
+
+/* ── BUILD FOOTNOTE ── */
+function buildFootnote(reportId, now, modeText, bdm, veh, screenOnly) {
+  const cls     = screenOnly ? 'footnote footnote-screen-only' : 'footnote';
+  const vehLine = veh.reg ? ` · No. Pendaftaran / Casis: ${esc(veh.reg)}` : '';
+  const pegLine = veh.pegawai ? ` · Pegawai Penyemak: ${esc(veh.pegawai)}` : '';
+
+  // Speedometer ayat: HANYA pada skrin (footnote-screen-only), TIDAK dalam laporan cetak
+  const speedoNote = screenOnly
+    ? `<li>Anggaran speedometer dikira berdasarkan nisbah diameter tayar baru berbanding tayar asal (paparan skrin sahaja — tidak dicetak).</li>`
+    : '';
+
+  return `
+    <div class="${cls}">
+      <div class="footnote-title">📋 Kriteria Kelulusan — SOP Bilangan 1 Tahun 2026 &amp; Pindaan</div>
+      <ol>
+        <li>Beza diameter tayar asal vs tayar baru mestilah dalam lingkungan
+          <strong>±${DIAM_TOLERANCE}%</strong>.</li>
+        <li>Kapasiti tayar (LI per tayar × bilangan tayar) mestilah
+          <strong>≥ Berat Gandar (BG)</strong>.</li>
+        <li>Nilai Aspek Ratio (AR) = <strong>${DEFAULT_AR}%</strong> jika tidak dinyatakan pada dinding tayar.</li>
+        ${speedoNote}
+        <li>Sisi dinding tayar baharu tidak boleh melebihi badan kenderaan. Tayar tidak boleh
+          bersentuhan dengan <em>wheel arch / wheelhouse / mudguard</em> semasa bergerak.</li>
+        <li>Keputusan ini untuk tujuan <strong>SEMAKAN &amp; RUJUKAN</strong> sahaja.
+          Keputusan muktamad tertakluk kepada pegawai JPJ yang bertugas.</li>
+      </ol>
+    </div>`;
+}
+
+/* ── RESET ── */
+function resetAll() {
+  document.querySelectorAll('.clr').forEach(inp => { inp.value = ''; inp.classList.remove('invalid'); });
+  ['veh_reg','veh_make','veh_model','veh_body','veh_pegawai'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) { el.value = ''; el.classList.remove('invalid'); }
+  });
+  document.getElementById('resultsArea').innerHTML  = '';
+  document.getElementById('btnPrint').style.display = 'none';
+  document.getElementById('bdmHint').textContent    = '';
+  document.getElementById('mainBDM').classList.remove('invalid');
+  axle2Type = 'single';
+  document.getElementById('btn1axle').classList.add('active');
+  document.getElementById('btn2axle').classList.remove('active');
+  updateUI();
+}
+
+/* ── ALERT TOAST ── */
+function showAlert(msg) {
+  const existing = document.getElementById('inline-alert');
+  if (existing) existing.remove();
+  const el = document.createElement('div');
+  el.id = 'inline-alert';
+  el.style.cssText = `
+    position:fixed;top:20px;left:50%;transform:translateX(-50%) translateY(-10px);
+    background:#c0392b;color:white;padding:12px 24px;border-radius:8px;
+    font-weight:700;font-size:0.88em;box-shadow:0 4px 20px rgba(0,0,0,0.25);
+    z-index:9999;animation:toastIn 0.3s ease forwards;`;
+  el.textContent = '⚠ ' + msg;
+  document.body.appendChild(el);
+  setTimeout(() => { if (el.parentNode) el.remove(); }, 4000);
+}
+
+const styleEl = document.createElement('style');
+styleEl.textContent = `@keyframes toastIn {
+  from{opacity:0;transform:translateX(-50%) translateY(-14px);}
+  to{opacity:1;transform:translateX(-50%) translateY(0);}
+}`;
+document.head.appendChild(styleEl);
+
+/* ── INIT ── */
+initInputs();
+updateUI();
+</script>
+</body>
+</html>
