@@ -79,7 +79,8 @@ body {
   background: var(--warn-lt); border: 1.5px solid var(--warn);
   border-left: 5px solid var(--warn); border-radius: var(--radius-sm);
   padding: 9px 16px; margin-bottom: 14px; font-size: 0.8em; color: #92400e;
-  display: flex; align-items: center; gap: 10px;
+  display: flex; align-items: flex-start; gap: 10px;
+  flex-wrap: wrap; word-break: break-word; overflow-wrap: break-word;
 }
 .pindaan-bar strong { color: var(--warn); }
 
@@ -429,6 +430,13 @@ th {
   }
   .btn-container { flex-direction:column; }
   .btn { width:100%; justify-content:center; }
+  .screen-header { flex-wrap:wrap; padding:16px; gap:12px; }
+  .header-text h1 { font-size:1.1em; }
+  .header-text h2 { font-size:0.76em; }
+  .header-badge { padding:4px 8px; font-size:0.68em; }
+  .pindaan-bar { font-size:0.73em; padding:8px 12px; }
+  .report-id-banner { font-size:0.72em; flex-direction:column; }
+  .report-id-meta { font-size:0.9em; }
 }
 </style>
 </head>
