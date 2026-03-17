@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SATP 2026 V5.0 — Sistem Analisis Tayar Perdagangan</title>
+<title>SATP 2026 (Mod Ujian-V7) — Sistem Analisis Tayar Perdagangan</title>
 <style>
 :root {
   --jpj-blue:    #003366;
@@ -386,7 +386,7 @@ th {
   .page-wrap { padding:0 5mm; max-width:100%; }
 
   .input-section, .btn-container, .screen-header, .pindaan-bar,
-  .report-id-banner, .verdict-banner, .speedo-wrap { display:none !important; }
+  .report-id-banner, .verdict-banner, .speedo-wrap, .site-footer { display:none !important; }
 
   .page-header-repeat {
     display:block !important;
@@ -448,6 +448,42 @@ th {
   .report-id-banner { font-size:0.72em; flex-direction:column; }
   .report-id-meta { font-size:0.9em; }
 }
+/* ── SITE FOOTER ── */
+.site-footer {
+  margin-top: 40px;
+  padding: 20px 0 10px;
+  border-top: 2px solid var(--jpj-blue);
+}
+.footer-inner {
+  text-align: center;
+  max-width: 600px;
+  margin: 0 auto;
+}
+.footer-line-main {
+  font-size: 0.82em;
+  font-weight: 800;
+  color: var(--jpj-blue);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+.footer-line-sub {
+  font-size: 0.74em;
+  color: var(--text-sub);
+  line-height: 1.6;
+  margin-bottom: 8px;
+}
+.footer-line-ver {
+  font-size: 0.68em;
+  color: var(--text-muted);
+  letter-spacing: 0.04em;
+}
+
+@media(max-width:768px) {
+  .site-footer { margin-top: 24px; }
+  .footer-line-main { font-size: 0.76em; }
+  .footer-line-sub { font-size: 0.7em; }
+}
 </style>
 </head>
 <body>
@@ -461,7 +497,7 @@ th {
       <h1>Sistem Analisis Tayar Perdagangan (SATP)</h1>
       <h2>Laporan Audit Teknikal · SOP Bilangan 1 Tahun 2026 &amp; Pindaan · Bahagian Kejuruteraan Automotif, JPJ Negeri Selangor</h2>
     </div>
-    <div class="header-badge">SATP<br>2026<br>V5.0</div>
+    <div class="header-badge">SATP<br>2026<br>Mod Ujian-V7</div>
   </header>
 
   <!-- PINDAAN NOTICE -->
@@ -492,7 +528,7 @@ th {
       </div>
     </div>
     <div class="print-meta-bar">
-      <span>Dijana oleh sistem SATP 2026 V5.0 · Pindaan SOP: ±7% · AR=100%</span>
+      <span>Dijana oleh sistem SATP 2026 (Mod Ujian-V7) · Pindaan SOP: ±7% · AR=100%</span>
       <span>Untuk Tujuan Semakan &amp; Rujukan Sahaja</span>
     </div>
   </div>
@@ -565,10 +601,10 @@ th {
           </div>
           <div class="axle2-toggle">
             <button type="button" class="toggle-btn active" id="btn1axle" onclick="setAxle2Type('single')">
-              1 Axle
+              Bas 2 Axle
             </button>
             <button type="button" class="toggle-btn" id="btn2axle" onclick="setAxle2Type('double')">
-              2 Axle (Tandem)
+              Bas 3 Axle (Tandem)
             </button>
             <span style="font-size:0.75em; color:var(--text-muted); margin-left:4px;">BG gandar 2 = 60% BDM (untuk kedua-dua axle)</span>
           </div>
@@ -588,6 +624,15 @@ th {
   </div><!-- end input-section -->
 
   <div id="resultsArea"></div>
+
+  <!-- FOOTER -->
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <div class="footer-line-main">Hakcipta Terpelihara &copy; MNK2026</div>
+      <div class="footer-line-sub">Sistem ini adalah untuk tujuan semakan dan rujukan sahaja.<br>Keputusan muktamad tertakluk kepada pegawai JPJ yang bertugas.</div>
+      <div class="footer-line-ver">SATP 2026 &middot; Mod Ujian-V7 &middot; Bahagian Kejuruteraan Automotif</div>
+    </div>
+  </footer>
 
 </div><!-- end page-wrap -->
 
@@ -641,6 +686,46 @@ function esc(str) {
 
 /* ── STATE PREFIX (boleh tukar ikut negeri) ── */
 const STATE_PREFIX = 'SEL';
+const TYRE_UNIT_AUTO = '';
+const TYRE_UNIT_MM   = 'mm';
+const TYRE_UNIT_INCH = 'inch';
+const ASPECT_RATIO_MIN = 1;
+const ASPECT_RATIO_MAX = 100;
+
+function buildUnitSelector(id) {
+  return `
+    <div class="field" style="margin-top:6px;">
+      <label class="field-label">Unit Lebar <span class="req">*</span></label>
+      <select id="${id}" class="clr">
+        <option value="${TYRE_UNIT_AUTO}" selected>Pilih Unit</option>
+        <option value="${TYRE_UNIT_MM}">Metrik (mm)</option>
+        <option value="${TYRE_UNIT_INCH}">Inci</option>
+      </select>
+    </div>`;
+}
+
+function resolveTyreUnit(widthRaw, explicitUnit) {
+  if (explicitUnit === TYRE_UNIT_MM || explicitUnit === TYRE_UNIT_INCH) return explicitUnit;
+  return null;
+}
+
+function widthToMm(widthRaw, explicitUnit) {
+  const widthNum = parseFloat(widthRaw);
+  if (isNaN(widthNum) || widthNum <= 0) return null;
+  const unit = resolveTyreUnit(widthRaw, explicitUnit);
+  return unit === TYRE_UNIT_INCH ? widthNum * 25.4 : widthNum;
+}
+
+function parseAspectRatio(raw, gLabel, warnings) {
+  const clean = (raw || '').trim();
+  if (clean === '') return { value: DEFAULT_AR, usedDefault: true, invalid: false };
+  const num = parseFloat(clean);
+  if (isNaN(num) || num < ASPECT_RATIO_MIN || num > ASPECT_RATIO_MAX) {
+    warnings.push(`${gLabel}: Nisbah tayar mesti antara ${ASPECT_RATIO_MIN} hingga ${ASPECT_RATIO_MAX}.`);
+    return { value: null, usedDefault: false, invalid: true };
+  }
+  return { value: num, usedDefault: false, invalid: false };
+}
 
 function getLICapacity(li) {
   const n = parseInt(li);
@@ -650,12 +735,44 @@ function getLICapacity(li) {
 
 /* ── AXLE 2 TYPE STATE (untuk mod Bas) ── */
 let axle2Type = 'single'; // 'single' atau 'double'
+let tandemCache = {};     // simpan state data tandem supaya tidak hilang semasa toggle
+
+const TANDEM_FIELDS = ['w1','r1','rim1','w2','r2','rim2','li1s','li1d','li2s','li2d'];
+const TANDEM_SUFFIXES = ['2a','2b'];
+
+function saveTandemState() {
+  TANDEM_SUFFIXES.forEach(suffix => {
+    TANDEM_FIELDS.forEach(prefix => {
+      const el = document.getElementById(`${prefix}_${suffix}`);
+      if (el) tandemCache[`${prefix}_${suffix}`] = el.value;
+    });
+    ['conf','unit1','unit2'].forEach(prefix => {
+      const el = document.getElementById(`${prefix}_${suffix}`);
+      if (el) tandemCache[`${prefix}_${suffix}`] = el.value;
+    });
+  });
+  const gNumEl = document.getElementById('g_num_2');
+  if (gNumEl) tandemCache['g_num_2'] = gNumEl.value;
+}
+
+function restoreTandemState() {
+  for (const [id, val] of Object.entries(tandemCache)) {
+    const el = document.getElementById(id);
+    if (el && !el.readOnly) el.value = val;
+  }
+}
 
 function setAxle2Type(type) {
+  // Simpan data tandem sebelum tukar (jika sedang dalam mod tandem)
+  if (axle2Type === 'double') saveTandemState();
+
   axle2Type = type;
   document.getElementById('btn1axle').classList.toggle('active', type === 'single');
   document.getElementById('btn2axle').classList.toggle('active', type === 'double');
   renderAxle2(type);
+
+  // Pulihkan data tandem jika kembali ke mod tandem
+  if (type === 'double') restoreTandemState();
 }
 
 /* ── RENDER AXLE 2 ── */
@@ -694,7 +811,8 @@ function buildSingleAxleBody(i, bdm, isAutoMode) {
         <input type="number" id="r1_${i}" class="clr" placeholder="Nisbah">
         <input type="number" step="0.5" id="rim1_${i}" class="clr" placeholder="RIM" min="1">
       </div>
-      <span class="field-hint">Lebar: mm (cth: 295) atau inci (cth: 10.00) · Nisbah kosong = ${DEFAULT_AR}%</span>
+      <span class="field-hint">Lebar: mm (cth: 295) atau inci (cth: 10.00) · Pilih unit secara manual · Nisbah kosong = ${DEFAULT_AR}%</span>
+      ${buildUnitSelector(`unit1_${i}`)}
     </div>
     <div class="section-divider">Tayar Baru (Alternatif)</div>
     <div class="field">
@@ -704,6 +822,7 @@ function buildSingleAxleBody(i, bdm, isAutoMode) {
         <input type="number" id="r2_${i}" class="clr" placeholder="Nisbah">
         <input type="number" step="0.5" id="rim2_${i}" class="clr" placeholder="RIM" min="1">
       </div>
+      ${buildUnitSelector(`unit2_${i}`)}
     </div>
     <div class="section-divider">Load Index &amp; Konfigurasi</div>
     <div class="field">
@@ -749,18 +868,20 @@ function buildDoubleAxle2Body(bgAutoVal) {
       <div class="field" style="margin-bottom:7px;">
         <label class="field-label">Tayar Asal — Lebar / Nisbah / RIM</label>
         <div class="input-row-3">
-          <input type="number" step="0.01" id="w1_2a" class="clr" placeholder="mm / inci">
+          <input type="number" step="0.01" id="w1_2a" class="clr" placeholder="mm / inci" min="1">
           <input type="number" id="r1_2a" class="clr" placeholder="Nisbah">
-          <input type="number" step="0.5" id="rim1_2a" class="clr" placeholder="RIM">
+          <input type="number" step="0.5" id="rim1_2a" class="clr" placeholder="RIM" min="1">
         </div>
+        ${buildUnitSelector('unit1_2a')}
       </div>
       <div class="field" style="margin-bottom:7px;">
         <label class="field-label">Tayar Baru — Lebar / Nisbah / RIM</label>
         <div class="input-row-3">
-          <input type="number" step="0.01" id="w2_2a" class="clr" placeholder="mm / inci">
+          <input type="number" step="0.01" id="w2_2a" class="clr" placeholder="mm / inci" min="1">
           <input type="number" id="r2_2a" class="clr" placeholder="Nisbah">
-          <input type="number" step="0.5" id="rim2_2a" class="clr" placeholder="RIM">
+          <input type="number" step="0.5" id="rim2_2a" class="clr" placeholder="RIM" min="1">
         </div>
+        ${buildUnitSelector('unit2_2a')}
       </div>
       <div class="field" style="margin-bottom:7px;">
         <label class="field-label">Load Index Tayar Asal — Single / Dual</label>
@@ -792,18 +913,20 @@ function buildDoubleAxle2Body(bgAutoVal) {
       <div class="field" style="margin-bottom:7px;">
         <label class="field-label">Tayar Asal — Lebar / Nisbah / RIM</label>
         <div class="input-row-3">
-          <input type="number" step="0.01" id="w1_2b" class="clr" placeholder="mm / inci">
+          <input type="number" step="0.01" id="w1_2b" class="clr" placeholder="mm / inci" min="1">
           <input type="number" id="r1_2b" class="clr" placeholder="Nisbah">
-          <input type="number" step="0.5" id="rim1_2b" class="clr" placeholder="RIM">
+          <input type="number" step="0.5" id="rim1_2b" class="clr" placeholder="RIM" min="1">
         </div>
+        ${buildUnitSelector('unit1_2b')}
       </div>
       <div class="field" style="margin-bottom:7px;">
         <label class="field-label">Tayar Baru — Lebar / Nisbah / RIM</label>
         <div class="input-row-3">
-          <input type="number" step="0.01" id="w2_2b" class="clr" placeholder="mm / inci">
+          <input type="number" step="0.01" id="w2_2b" class="clr" placeholder="mm / inci" min="1">
           <input type="number" id="r2_2b" class="clr" placeholder="Nisbah">
-          <input type="number" step="0.5" id="rim2_2b" class="clr" placeholder="RIM">
+          <input type="number" step="0.5" id="rim2_2b" class="clr" placeholder="RIM" min="1">
         </div>
+        ${buildUnitSelector('unit2_2b')}
       </div>
       <div class="field" style="margin-bottom:7px;">
         <label class="field-label">Load Index Tayar Asal — Single / Dual</label>
@@ -833,7 +956,7 @@ function buildDoubleAxle2Body(bgAutoVal) {
       <label class="field-label">Berat Gandar (BG) — Keseluruhan Gandar 2 (60% BDM)</label>
       <input type="number" id="bg_2" class="clr" value="${bgDisplay}"
              placeholder="Auto (BDM × 60%)" readonly min="1" max="60000">
-      <span class="field-hint">BG 60% dikongsi antara Axle 2A dan 2B — setiap axle semak secara berasingan</span>
+      <span class="field-hint">BG keseluruhan 60% BDM diagih sama rata sebagai purata 50:50 untuk Axle 2A dan 2B sehingga formula rasmi diperoleh.</span>
     </div>`;
 }
 
@@ -852,35 +975,28 @@ function generateReportId() {
 
 /* ── KIRA DIAMETER ──
    Sokong 2 format tayar:
-   1) Metrik mm  : 295/80 R22.5  → lebar dalam mm (w ≥ 30)
-   2) Inci       : 10.00 R 20    → lebar dalam inci (w < 30), convert ke mm (* 25.4)
-      Contoh lain: 7.50 R 16, 11.00 R 20, 12.00 R 24
-   Nota: had < 30 dipilih kerana tayar inci paling besar ~24 inci
-         dan tayar metrik paling kecil ~125 mm
+   1) Metrik mm  : 295/80 R22.5
+   2) Inci       : 10.00 R 20
+   Unit mesti dipilih oleh pengguna untuk elak salah tafsir.
    ── */
-function calcD(w, r, rim) {
-  if (!w || !rim) return 0;
-  const wNum    = parseFloat(w);
+function calcD(w, r, rim, unit) {
+  const widthMm = widthToMm(w, unit);
   const rimNum  = parseFloat(rim);
-  // Inci jika lebar < 30 (contoh: 10.00, 7.50, 12.00)
-  const widthMm = (wNum < 30) ? wNum * 25.4 : wNum;
-  const ratio   = (r > 0 && !isNaN(r)) ? parseFloat(r) : DEFAULT_AR;
+  if (widthMm === null || isNaN(rimNum) || rimNum <= 0) return 0;
   const rimMm   = rimNum * 25.4;
-  return 2 * (widthMm * ratio / 100) + rimMm;
+  return 2 * (widthMm * parseFloat(r) / 100) + rimMm;
 }
 
-function isInchTyre(w) {
-  return parseFloat(w) < 30;
+function isInchTyre(w, unit) {
+  return resolveTyreUnit(w, unit) === TYRE_UNIT_INCH;
 }
 
-function formatTire(w, r, rim) {
+function formatTire(w, r, rim, unit) {
   if (!w) return '—';
-  if (isInchTyre(w)) {
-    // Format inci: 10.00 R 20 (tanpa nisbah) atau 10.00/80 R 20 (dengan nisbah)
+  if (isInchTyre(w, unit)) {
     const rDisplay = (r && parseFloat(r) !== DEFAULT_AR) ? `/${r}` : '';
     return `${parseFloat(w).toFixed(2)}${rDisplay} R ${rim}`;
   }
-  // Format metrik: 295/80R22.5
   return r ? `${w}/${r}R${rim}` : `${w}R${rim}`;
 }
 
@@ -1023,78 +1139,95 @@ function processAxle(suffix, gNum, bdm, bg, warnings) {
   /* suffix = '2', '2a', '2b', etc. */
   const gLabel = `Gandar ${gNum}${suffix === '2a' ? 'A' : suffix === '2b' ? 'B' : ''}`;
 
-  const w1raw  = (document.getElementById(`w1_${suffix}`)?.value || '').trim();
-  const w1     = parseFloat(w1raw);
+  const w1raw   = (document.getElementById(`w1_${suffix}`)?.value || '').trim();
+  const unit1   = document.getElementById(`unit1_${suffix}`)?.value || TYRE_UNIT_AUTO;
+  const w1      = parseFloat(w1raw);
   if (!w1 || w1 <= 0) return null;
 
-  // Validate lebar — sokong metrik (mm) dan inci
-  // Tayar inci jika w < 30 (cth: 10.00, 7.50, 11.00), tayar metrik jika w >= 30
-  const w1mm = (w1 < 30) ? w1 * 25.4 : w1;
-  if (w1mm < 127 || w1mm > 610)
-    warnings.push(`${gLabel}: Lebar tayar (${w1}${w1 < 30 ? '"' : ' mm'}) luar julat lazim — semak semula.`);
+  if (!unit1) {
+    warnings.push(`${gLabel}: Sila pilih unit tayar asal (Metrik atau Inci).`);
+    return null;
+  }
 
-  const r1raw  = (document.getElementById(`r1_${suffix}`)?.value || '').trim();
-  const rim1raw= (document.getElementById(`rim1_${suffix}`)?.value || '').trim();
-  const r1     = parseFloat(r1raw)  || DEFAULT_AR;
-  const rim1   = parseFloat(rim1raw);
+  const w1mm = widthToMm(w1raw, unit1);
+  if (w1mm === null) {
+    warnings.push(`${gLabel}: Lebar tayar asal tidak sah.`);
+    return null;
+  }
+  if (w1mm < 127 || w1mm > 610) {
+    const unitLabel = resolveTyreUnit(w1raw, unit1) === TYRE_UNIT_INCH ? ' inci' : ' mm';
+    warnings.push(`${gLabel}: Lebar tayar asal (${w1}${unitLabel}) luar julat lazim - semak semula.`);
+  }
 
+  const r1raw   = (document.getElementById(`r1_${suffix}`)?.value || '').trim();
+  const rim1raw = (document.getElementById(`rim1_${suffix}`)?.value || '').trim();
+  const ratio1  = parseAspectRatio(r1raw, gLabel, warnings);
+  const rim1    = parseFloat(rim1raw);
+
+  if (ratio1.invalid) return null;
   if (isNaN(rim1) || rim1 <= 0) {
-    warnings.push(`${gLabel}: RIM tayar asal tidak diisi — dilangkau.`); return null;
+    warnings.push(`${gLabel}: RIM tayar asal tidak diisi - dilangkau.`);
+    return null;
   }
 
-  const w2raw   = (document.getElementById(`w2_${suffix}`)?.value || '').trim();
-  const r2raw   = (document.getElementById(`r2_${suffix}`)?.value || '').trim();
-  const rim2raw = (document.getElementById(`rim2_${suffix}`)?.value || '').trim();
+  const w2raw    = (document.getElementById(`w2_${suffix}`)?.value || '').trim();
+  const r2raw    = (document.getElementById(`r2_${suffix}`)?.value || '').trim();
+  const rim2raw  = (document.getElementById(`rim2_${suffix}`)?.value || '').trim();
+  const unit2    = document.getElementById(`unit2_${suffix}`)?.value || TYRE_UNIT_AUTO;
+  const hasNewW  = w2raw !== '';
+  const hasNewR  = r2raw !== '';
+  const hasNewRm = rim2raw !== '';
 
-  // ── VALIDASI TAYAR BARU — cegah silent fallback ──
-  const w2filled   = w2raw !== '';
-  const rim2filled = rim2raw !== '';
-  const r2filled   = r2raw !== '';
-
-  // Kes 1: Semua kosong — tayar baru = tayar asal (tiada perubahan)
-  // Kes 2: Semua diisi — OK
-  // Kes 3: Separa diisi — AMARAN KERAS, beritahu pengguna apa yang berlaku
-  if (w2filled && !rim2filled) {
-    warnings.push(`⚠ ${gLabel}: Lebar tayar baru diisi tetapi RIM tidak diisi — sistem guna RIM asal (${rim1}). Sila semak.`);
-  }
-  if (!w2filled && rim2filled) {
-    warnings.push(`⚠ ${gLabel}: RIM tayar baru diisi tetapi Lebar tidak diisi — sistem guna Lebar asal (${w1}). Sila semak.`);
+  // Tayar baru WAJIB — sekurang-kurangnya Lebar dan RIM mesti diisi
+  // Nisbah (Aspek Ratio) boleh kosong kerana tayar inci cth: 10.00 R16 tiada nisbah
+  if (!hasNewW || !hasNewRm) {
+    warnings.push(`${gLabel}: Tayar baru WAJIB diisi — sekurang-kurangnya Lebar dan RIM. (Nisbah boleh kosong jika tayar jenis inci)`);
+    return null;
   }
 
-  const w2   = parseFloat(w2raw)   || w1;
-  const r2   = parseFloat(r2raw)   || r1;
-  const rim2 = parseFloat(rim2raw) || rim1;
+  if (!unit2) {
+    warnings.push(`${gLabel}: Sila pilih unit tayar baru (Metrik atau Inci).`);
+    return null;
+  }
 
-  const d1 = calcD(w1, r1, rim1);
-  const d2 = calcD(w2, r2, rim2);
+  const ratio2 = parseAspectRatio(r2raw, gLabel, warnings);
+  if (ratio2.invalid) return null;
 
-  if (d1 <= 0) { warnings.push(`${gLabel}: Tidak dapat mengira diameter tayar asal.`); return null; }
+  const w2    = parseFloat(w2raw);
+  const rim2  = parseFloat(rim2raw);
+  const r1    = ratio1.value;
+  const r2    = ratio2.value;
+  const finalUnit2 = unit2;
+
+  if (isNaN(w2) || w2 <= 0 || isNaN(rim2) || rim2 <= 0) {
+    warnings.push(`${gLabel}: Tayar baru tidak sah - semakan dihentikan bagi gandar ini.`);
+    return null;
+  }
+
+  const d1 = calcD(w1, r1, rim1, unit1);
+  const d2 = calcD(w2, r2, rim2, finalUnit2);
+
+  if (d1 <= 0 || d2 <= 0) {
+    warnings.push(`${gLabel}: Tidak dapat mengira diameter tayar.`);
+    return null;
+  }
 
   const diff = ((d2 - d1) / d1) * 100;
 
-  const confEl  = document.getElementById(`conf_${suffix}`);
-  const conf    = confEl ? confEl.value : 'dual';
+  const confEl    = document.getElementById(`conf_${suffix}`);
+  const conf      = confEl ? confEl.value : 'dual';
   const tyreCount = conf === 'dual' ? 4 : 2;
 
-  // ── LI TAYAR ASAL ──
-  const liRawOri   = conf === 'dual'
+  // ── LI TAYAR ASAL (opsyenal sahaja) ──
+  const liRawOri = conf === 'dual'
     ? parseInt(document.getElementById(`li1d_${suffix}`)?.value || '')
     : parseInt(document.getElementById(`li1s_${suffix}`)?.value || '');
   const liPerTyreOri = getLICapacity(liRawOri);
-  let capOri = 0, liErrorOri = false;
+  const liErrorOri = liPerTyreOri === null;
+  const capOri = liErrorOri ? 0 : liPerTyreOri * tyreCount;
 
-  if (liPerTyreOri === null) {
-    liErrorOri = true;
-    warnings.push(`${gLabel}: Load Index tayar asal tidak diisi — kapasiti asal tidak dapat dikira.`);
-  } else {
-    capOri = liPerTyreOri * tyreCount;
-    if (capOri < bg) {
-      warnings.push(`${gLabel}: Kapasiti tayar asal (${capOri.toLocaleString()} kg) kurang daripada BG (${Math.round(bg).toLocaleString()} kg).`);
-    }
-  }
-
-  // ── LI TAYAR BARU ──
-  const liRaw   = conf === 'dual'
+  // ── LI TAYAR BARU (kritikal untuk keputusan) ──
+  const liRaw = conf === 'dual'
     ? parseInt(document.getElementById(`li2d_${suffix}`)?.value || '')
     : parseInt(document.getElementById(`li2s_${suffix}`)?.value || '');
 
@@ -1103,17 +1236,16 @@ function processAxle(suffix, gNum, bdm, bg, warnings) {
 
   if (liPerTyre === null) {
     liError = true;
-    const liMsg = isNaN(liRaw) ? 'tidak diisi' : `${liRaw} (luar julat sah ${LI_MIN}–${LI_MAX})`;
-    warnings.push(`${gLabel}: Load Index tayar baru ${liMsg} — kapasiti tidak dapat dikira.`);
+    const liMsg = isNaN(liRaw) ? 'tidak diisi' : `${liRaw} (luar julat sah ${LI_MIN}-${LI_MAX})`;
+    warnings.push(`${gLabel}: Load Index tayar baru ${liMsg} - kapasiti tidak dapat dikira.`);
   } else {
     cap = liPerTyre * tyreCount;
   }
 
-  const diamOk = Math.abs(diff) <= DIAM_TOLERANCE;
+  const diamOk = Math.abs(diff) <= DIAM_TOLERANCE + 1e-9;
   const capOk  = !liError && cap >= bg;
-  const isPass = diamOk && capOk && !liError;
+  const isPass = diamOk && capOk;
 
-  // Speedometer (skrin sahaja)
   const speedoRows = [80, 90, 100, 110, 120].map(s => {
     const real  = (d2 / d1 * s).toFixed(1);
     const delta = (d2 / d1 * s - s).toFixed(1);
@@ -1128,7 +1260,7 @@ function processAxle(suffix, gNum, bdm, bg, warnings) {
   return {
     gNum: suffix === '2a' ? `${gNum}A` : suffix === '2b' ? `${gNum}B` : gNum,
     isPass, bdm, bg, w1, r1, rim1, w2, r2, rim2,
-    d1, d2, cap, diff, diamOk, capOk, conf,
+    unit1, unit2: finalUnit2, d1, d2, cap, diff, diamOk, capOk, conf,
     speedoRows, liError, liRaw, liPerTyre,
     capOri, liRawOri, liPerTyreOri, liErrorOri
   };
@@ -1196,8 +1328,9 @@ function runAnalysis() {
 
     // Gandar 2 Bas — 2 axle
     if (i === 2 && isBas && axle2Type === 'double') {
-      const cardA = processAxle('2a', gNum, bdm, bg, warnings);
-      const cardB = processAxle('2b', gNum, bdm, bg, warnings);
+      const bgPerAxle = bg / 2;
+      const cardA = processAxle('2a', gNum, bdm, bgPerAxle, warnings);
+      const cardB = processAxle('2b', gNum, bdm, bgPerAxle, warnings);
       if (cardA) axleCards.push(cardA);
       if (cardB) axleCards.push(cardB);
       continue;
@@ -1214,7 +1347,8 @@ function runAnalysis() {
   const dupes = new Set();
   gNums.forEach(g => { if (seen.has(g)) dupes.add(g); seen.add(g); });
   if (dupes.size > 0) {
-    warnings.push(`⚠ No. Gandar duplikat dikesan: ${[...dupes].join(', ')} — sila semak input.`);
+    showAlert('No. Gandar duplikat dikesan: ' + [...dupes].join(', ') + '. Sila semak input.');
+    return;
   }
 
   if (axleCards.length === 0) {
@@ -1363,12 +1497,12 @@ function buildCard(a, modeText, veh) {
 
   // Kapasiti tayar ASAL
   const capOriDisplay = a.liErrorOri
-    ? `<span style="color:var(--text-muted);">LI tidak diisi</span>`
+    ? `<span style="color:var(--text-muted);">Tidak diisi</span>`
     : `<span class="${a.capOri >= a.bg ? 'val-pass' : 'val-fail'}">
         ${a.capOri.toLocaleString()} kg &nbsp; ${a.capOri >= a.bg ? '✔' : '✘ Kurang BG'}
        </span>`;
 
-  const liLabelOri = a.liErrorOri ? '—'
+  const liLabelOri = a.liErrorOri ? 'Tidak diisi (opsyenal)'
     : `LI ${a.liRawOri} → ${a.liPerTyreOri ? a.liPerTyreOri.toLocaleString() : '—'} kg/tayar`;
 
   const hasVehInfo = veh.reg || veh.make || veh.model || veh.body;
@@ -1431,8 +1565,8 @@ function buildCard(a, modeText, veh) {
         <tr><th>BDM Kenderaan</th><td class="val-bold">${a.bdm.toLocaleString()} kg</td></tr>
         <tr><th>Berat Gandar (BG)</th><td class="val-bold">${Math.round(a.bg).toLocaleString()} kg</td></tr>
         <tr><th>Konfigurasi</th><td>${a.conf === 'dual' ? 'Dual / Berkembar (4 tayar)' : 'Single / Tunggal (2 tayar)'}</td></tr>
-        <tr><th>Tayar Asal</th><td class="val-bold">${formatTire(a.w1, a.r1, a.rim1)}</td></tr>
-        <tr><th>Tayar Baru</th><td class="val-bold">${formatTire(a.w2, a.r2, a.rim2)}</td></tr>
+        <tr><th>Tayar Asal</th><td class="val-bold">${formatTire(a.w1, a.r1, a.rim1, a.unit1)}</td></tr>
+        <tr><th>Tayar Baru</th><td class="val-bold">${formatTire(a.w2, a.r2, a.rim2, a.unit2)}</td></tr>
         <tr><th>Diameter Asal</th><td class="val-bold">${a.d1.toFixed(1)} mm</td></tr>
         <tr><th>Diameter Baru</th><td class="val-bold">${a.d2.toFixed(1)} mm</td></tr>
         <tr>
@@ -1461,9 +1595,7 @@ function buildCard(a, modeText, veh) {
 
 /* ── BUILD FOOTNOTE ── */
 function buildFootnote(reportId, now, modeText, bdm, veh, screenOnly) {
-  const cls     = screenOnly ? 'footnote footnote-screen-only' : 'footnote';
-  const vehLine = veh.reg ? ` · No. Pendaftaran / Casis: ${esc(veh.reg)}` : '';
-  const pegLine = veh.pegawai ? ` · Pegawai Penyemak: ${esc(veh.pegawai)}` : '';
+  const cls = screenOnly ? 'footnote footnote-screen-only' : 'footnote';
 
   // Speedometer ayat: HANYA pada skrin (footnote-screen-only), TIDAK dalam laporan cetak
   const speedoNote = screenOnly
@@ -1478,7 +1610,7 @@ function buildFootnote(reportId, now, modeText, bdm, veh, screenOnly) {
           <strong>±${DIAM_TOLERANCE}%</strong>.</li>
         <li>Kapasiti tayar (LI per tayar × bilangan tayar) mestilah
           <strong>≥ Berat Gandar (BG)</strong>.</li>
-        <li>Nilai Aspek Ratio (AR) = <strong>${DEFAULT_AR}%</strong> jika tidak dinyatakan pada dinding tayar.</li>
+        <li>Nilai Aspek Ratio (AR) = <strong>${DEFAULT_AR}%</strong> jika tidak dinyatakan pada dinding tayar. Jika diisi, nilai mestilah antara <strong>${ASPECT_RATIO_MIN} hingga ${ASPECT_RATIO_MAX}</strong>.</li>
         ${speedoNote}
         <li>Sisi dinding tayar baharu tidak boleh melebihi badan kenderaan. Tayar tidak boleh
           bersentuhan dengan <em>wheel arch / wheelhouse / mudguard</em> semasa bergerak.</li>
@@ -1499,6 +1631,7 @@ function resetAll() {
   document.getElementById('btnPrint').style.display = 'none';
   document.getElementById('bdmHint').textContent    = '';
   document.getElementById('mainBDM').classList.remove('invalid');
+  tandemCache = {};
   axle2Type = 'single';
   document.getElementById('btn1axle').classList.add('active');
   document.getElementById('btn2axle').classList.remove('active');
