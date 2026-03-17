@@ -380,10 +380,10 @@ th {
 
 /* ── PRINT MEDIA ── */
 @media print {
-  @page { size:landscape; margin:8mm; }
+  @page { size:landscape; margin:12mm 15mm; }
 
-  body { padding:0; background:white; margin:0; font-size:11px; }
-  .page-wrap { padding:0; max-width:100%; }
+  body { padding:0; background:white; margin:0; font-size:10.5px; }
+  .page-wrap { padding:0 5mm; max-width:100%; }
 
   .input-section, .btn-container, .screen-header, .pindaan-bar,
   .report-id-banner, .verdict-banner, .speedo-wrap { display:none !important; }
@@ -391,8 +391,12 @@ th {
   .page-header-repeat {
     display:block !important;
     border-bottom:2px solid var(--jpj-blue);
-    margin-bottom:12px; padding-bottom:8px;
+    margin-bottom:8px; padding-bottom:5px;
   }
+  .page-header-repeat h2 { font-size:1em !important; }
+  .page-header-repeat p { font-size:0.7em !important; }
+  .print-header-left, .print-header-right { font-size:0.68em !important; }
+  .print-meta-bar { font-size:0.65em !important; }
 
   #resultsArea { margin-top:0; }
 
@@ -405,11 +409,15 @@ th {
   /* Pastikan print-page TIDAK auto page-break kecuali yang ada .page-break-before */
   .print-page { page-break-before: avoid; page-break-after: avoid; }
   .print-page.page-break-before { page-break-before: always !important; }
-  .report-col { break-inside:avoid; border-radius:0; }
+  .report-col { break-inside:avoid; border-radius:0; overflow:hidden; }
+  .report-col table { table-layout:fixed; word-wrap:break-word; }
+  .report-col th, .report-col td { font-size:0.72em; padding:4px 8px; }
   .report-col.pass { border-color:#1a7a3c !important; }
   .report-col.fail { border-color:#c0392b !important; }
 
-  .footnote { background:white; border:1px solid #bbb; }
+  .results-grid { gap:10px; }
+  .footnote { background:white; border:1px solid #bbb; font-size:0.72em; }
+  .page-number { font-size:0.68em; }
   .print-page .footnote { display:block !important; }
   .footnote-screen-only { display:none !important; }
   .warning-box { display:none !important; }
@@ -418,10 +426,12 @@ th {
   .ulasan-garisan { display:block !important; }
   .ulasan-print-text {
     display:block !important;
-    font-size:0.82em; color:var(--text); font-weight:600;
-    padding:4px 0; min-height:14px;
+    font-size:0.78em; color:var(--text); font-weight:600;
+    padding:2px 0; min-height:10px;
     white-space:pre-wrap; word-wrap:break-word;
   }
+  .ulasan-block { padding:5px 8px; }
+  .ulasan-line { height:18px; margin-bottom:4px; }
 }
 
 @media(max-width:768px) {
