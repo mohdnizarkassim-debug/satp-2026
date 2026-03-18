@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SATP 2026 (Mod Ujian-V7) — Sistem Analisis Tayar Perdagangan</title>
+<title>SATP 2026 — Sistem Analisis Tayar Perdagangan</title>
 <style>
 :root {
   --jpj-blue:    #003366;
@@ -484,6 +484,89 @@ th {
   .footer-line-main { font-size: 0.76em; }
   .footer-line-sub { font-size: 0.7em; }
 }
+/* ── ADMIN BUTTON ── */
+.btn-admin-toggle {
+  background: none; border: 1px solid var(--border);
+  color: var(--text-muted); font-size: 0.7em; padding: 4px 12px;
+  border-radius: var(--radius-sm); cursor: pointer;
+  transition: var(--transition); font-weight: 600;
+}
+.btn-admin-toggle:hover { color: var(--jpj-blue); border-color: var(--jpj-blue); }
+
+/* ── ADMIN OVERLAY ── */
+.admin-overlay {
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(0,0,0,0.5); z-index: 10000;
+  display: flex; align-items: center; justify-content: center;
+  animation: fadeIn 0.2s ease;
+}
+@keyframes fadeIn { from{opacity:0;} to{opacity:1;} }
+
+.admin-panel {
+  background: var(--surface); border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg); width: 90%; max-width: 750px;
+  max-height: 85vh; display: flex; flex-direction: column;
+  overflow: hidden;
+}
+.admin-header {
+  background: var(--jpj-blue); color: white; padding: 14px 20px;
+  font-weight: 800; font-size: 0.9em; letter-spacing: 0.04em;
+  display: flex; justify-content: space-between; align-items: center;
+}
+.admin-close {
+  background: none; border: none; color: white; font-size: 1.3em;
+  cursor: pointer; padding: 0 4px; opacity: 0.7;
+}
+.admin-close:hover { opacity: 1; }
+
+.admin-tabs {
+  display: flex; border-bottom: 2px solid var(--border); background: var(--jpj-blue-lt);
+}
+.admin-tab {
+  flex: 1; padding: 10px 12px; border: none; background: none;
+  font-size: 0.78em; font-weight: 700; color: var(--text-sub);
+  cursor: pointer; transition: var(--transition);
+  border-bottom: 3px solid transparent;
+}
+.admin-tab.active { color: var(--jpj-blue); border-bottom-color: var(--jpj-blue); background: white; }
+.admin-tab:hover { color: var(--jpj-blue); }
+
+.admin-body {
+  flex: 1; overflow-y: auto; padding: 16px 20px;
+  font-size: 0.82em; color: var(--text); line-height: 1.6;
+}
+.admin-footer {
+  border-top: 1px solid var(--border); padding: 10px 20px;
+  display: flex; gap: 8px; justify-content: flex-end;
+}
+
+/* Admin content styles */
+.cl-entry { margin-bottom: 14px; padding-bottom: 12px; border-bottom: 1px solid var(--border); }
+.cl-entry:last-child { border-bottom: none; }
+.cl-ver { font-weight: 800; color: var(--jpj-blue); font-size: 1.05em; }
+.cl-date { font-size: 0.85em; color: var(--text-muted); margin-left: 8px; }
+.cl-items { margin-top: 4px; padding-left: 18px; color: var(--text-sub); }
+.cl-items li { margin-bottom: 2px; }
+
+.audit-row { padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 0.88em; }
+.audit-row:last-child { border-bottom: none; }
+.audit-id { font-weight: 800; color: var(--jpj-blue); }
+.audit-pass { color: var(--safe); font-weight: 700; }
+.audit-fail { color: var(--jpj-red); font-weight: 700; }
+.audit-meta { color: var(--text-muted); font-size: 0.85em; }
+.audit-empty { text-align: center; padding: 40px; color: var(--text-muted); }
+
+.settings-group { margin-bottom: 16px; }
+.settings-label { font-weight: 700; color: var(--text-sub); font-size: 0.82em; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 6px; }
+.settings-row { display: flex; gap: 8px; align-items: center; }
+.settings-input { flex: 1; padding: 7px 10px; border: 1.5px solid var(--border); border-radius: var(--radius-sm); font-size: 0.88em; }
+.settings-btn { padding: 7px 14px; background: var(--jpj-blue); color: white; border: none; border-radius: var(--radius-sm); font-weight: 700; font-size: 0.82em; cursor: pointer; }
+.settings-btn:hover { background: var(--jpj-blue-mid); }
+.settings-msg { font-size: 0.8em; margin-top: 4px; }
+
+@media print {
+  .admin-overlay, .btn-admin-toggle { display: none !important; }
+}
 </style>
 </head>
 <body>
@@ -497,7 +580,7 @@ th {
       <h1>Sistem Analisis Tayar Perdagangan (SATP)</h1>
       <h2>Laporan Audit Teknikal · SOP Bilangan 1 Tahun 2026 &amp; Pindaan · Bahagian Kejuruteraan Automotif, JPJ Negeri Selangor</h2>
     </div>
-    <div class="header-badge">SATP<br>2026<br>Mod Ujian-V7</div>
+    <div class="header-badge" id="headerBadge">SATP<br>2026<br>—</div>
   </header>
 
   <!-- PINDAAN NOTICE -->
@@ -505,7 +588,9 @@ th {
     ⚠ <strong>Pindaan SOP Berkuat Kuasa:</strong>
     &nbsp;(1) Had beza diameter <strong>±7%</strong> &nbsp;|&nbsp;
     (2) Nilai Aspek Ratio <strong>100%</strong> jika tidak dinyatakan pada dinding tayar &nbsp;|&nbsp;
-    (3) Formula BG 40%/60% terpakai untuk <strong>Decontrolled, Bas &amp; kenderaan tanpa data BG</strong>
+    (3) Formula BG 40%/60% terpakai untuk <strong>Decontrolled, Bas &amp; kenderaan tanpa data BG</strong> &nbsp;|&nbsp;
+    (4) Penukaran tayar bagi <strong>teksi bermeter</strong> dan <strong>kereta sewa</strong> adalah <strong style="color:#c0392b;">TIDAK DIBENARKAN</strong> (Perkara 6.11 &amp; 6.12) &nbsp;|&nbsp;
+    (5) Kenderaan jenis <strong>mobile machineries</strong> tidak disokong oleh sistem ini — semakan hendaklah dibuat <strong>secara manual</strong> menggunakan BTM
   </div>
 
   <!-- PRINT ONLY HEADER -->
@@ -528,7 +613,7 @@ th {
       </div>
     </div>
     <div class="print-meta-bar">
-      <span>Dijana oleh sistem SATP 2026 (Mod Ujian-V7) · Pindaan SOP: ±7% · AR=100%</span>
+      <span id="printMetaVersion">Dijana oleh sistem SATP 2026</span>
       <span>Untuk Tujuan Semakan &amp; Rujukan Sahaja</span>
     </div>
   </div>
@@ -630,14 +715,161 @@ th {
     <div class="footer-inner">
       <div class="footer-line-main">Hakcipta Terpelihara &copy; MNK2026</div>
       <div class="footer-line-sub">Sistem ini adalah untuk tujuan semakan dan rujukan sahaja.<br>Keputusan muktamad tertakluk kepada pegawai JPJ yang bertugas.</div>
-      <div class="footer-line-ver">SATP 2026 &middot; Mod Ujian-V7 &middot; Bahagian Kejuruteraan Automotif</div>
+      <div class="footer-line-ver" id="footerVersion">SATP 2026</div>
+      <div style="margin-top:10px;">
+        <button class="btn-admin-toggle" onclick="promptAdminLogin()">⚙ Admin</button>
+      </div>
     </div>
   </footer>
+
+  <!-- ADMIN PANEL OVERLAY -->
+  <div id="adminOverlay" class="admin-overlay" style="display:none;">
+    <div class="admin-panel">
+      <div class="admin-header">
+        <span>⚙ Panel Pentadbir Sistem</span>
+        <button class="admin-close" onclick="closeAdmin()">✕</button>
+      </div>
+      <div class="admin-tabs">
+        <button class="admin-tab active" id="tabChangelog" onclick="switchAdminTab('changelog')">📋 Changelog</button>
+        <button class="admin-tab" id="tabAudit" onclick="switchAdminTab('audit')">📊 Audit Trail</button>
+        <button class="admin-tab" id="tabSettings" onclick="switchAdminTab('settings')">🔧 Tetapan</button>
+      </div>
+      <div class="admin-body" id="adminBody"></div>
+      <div class="admin-footer">
+        <button class="btn btn-reset" onclick="exportAdminLog()" style="font-size:0.75em;">📥 Export Log</button>
+        <button class="btn btn-reset" onclick="printAdminLog()" style="font-size:0.75em;">🖨 Cetak Log</button>
+      </div>
+    </div>
+  </div>
 
 </div><!-- end page-wrap -->
 
 <script>
 'use strict';
+
+/* ══════════════════════════════════════════════════
+   SYSTEM CONFIG — TUKAR VERSI DI SINI SAHAJA
+   ══════════════════════════════════════════════════ */
+const SYS_VERSION    = 'V8.2';
+const SYS_LABEL      = `SATP 2026 Mod Ujian (${SYS_VERSION})`;
+const SYS_SHORT      = `Mod Ujian-${SYS_VERSION}`;
+
+/* ── ADMIN PASSWORD (simpan dalam localStorage) ── */
+let adminPassword = localStorage.getItem('satp_admin_pw') || 'admin2026';
+
+/* ── CHANGELOG ── */
+const CHANGELOG = [
+  { ver:'V8.2', tarikh:'2026-03-18', items:[
+    'Logik beza diameter diubah — bulatkan ke 1 titik perpuluhan sebelum banding',
+    'Had ±7.0% selepas pembulatan: 7.04% = LULUS (bundar jadi 7.0%), 7.05% = GAGAL (bundar jadi 7.1%)',
+    'Menyelesaikan isu paparan vs keputusan tidak konsisten (cth: paparan 7.00% tapi GAGAL)',
+    'Epsilon fix (1e-9) diganti dengan pembulatan 1dp — lebih bersih dan konsisten',
+  ]},
+  { ver:'V8.1', tarikh:'2026-03-18', items:[
+    'Pindaan bar dikemaskini — tambah notis teksi bermeter, kereta sewa (tidak dibenarkan) dan mobile machineries (manual)',
+    'Audit trail kini kekal dalam browser (localStorage) — tidak hilang walaupun tutup browser',
+    'Ruangan catatan ditambah pada setiap audit entry — untuk mod ujian',
+    'Butang Padam Semua ditambah — wajib isi sebab sebelum padam, rekod pemadaman disimpan',
+    'Changelog auto-update bila ada perubahan versi',
+  ]},
+  { ver:'V8', tarikh:'2026-03-18', items:[
+    'Logik tandem dikemaskini — setiap axle 2A/2B mesti >= 60% BDM (bukan 50:50 split)',
+    'Admin panel ditambah — changelog, audit trail, password protected',
+    'Versi sistem dipusatkan — satu constant SYS_VERSION untuk semua rujukan',
+  ]},
+  { ver:'V7', tarikh:'2026-03-17', items:[
+    'Floating-point fix — epsilon tolerance pada sempadan ±7.0%',
+    'Tayar baru wajib — Lebar dan RIM mesti diisi, Nisbah optional (tayar inci)',
+    'Tandem cache — data tidak hilang semasa toggle Bas 2 Axle / 3 Axle',
+    'Label versi dikemaskini ke Mod Ujian-V7',
+    'Toggle bas ditukar: Bas 2 Axle / Bas 3 Axle (Tandem)',
+    'Footer hakcipta ditambah',
+  ]},
+  { ver:'V6', tarikh:'2026-03-15', items:[
+    'Sokongan unit manual — pengguna pilih Metrik (mm) atau Inci',
+    'Validasi lebar tayar julat lazim 127-610mm',
+  ]},
+  { ver:'V5', tarikh:'2026-03-10', items:[
+    'Sokongan Bas 3 Axle (Tandem) dengan split 50:50',
+    'Speedometer anggaran ditambah',
+    'Ruangan ulasan pegawai penyemak',
+  ]},
+  { ver:'V4', tarikh:'2026-03-05', items:[
+    'Mod Bas ditambah dengan BG auto 40%/60%',
+    'Pindaan SOP: had diameter ±7%, AR default 100%',
+  ]},
+  { ver:'V3', tarikh:'2026-02-25', items:[
+    'Load Index database LI 0-270 lengkap',
+    'Sokongan sehingga 4 gandar untuk Lori Berat',
+  ]},
+  { ver:'V2', tarikh:'2026-02-15', items:[
+    'Mod Decontrolled ditambah (BDM <= 7500kg)',
+    'Borang permohonan JPJ-KA1 dirujuk',
+  ]},
+  { ver:'V1', tarikh:'2026-02-01', items:[
+    'Versi awal — pengiraan diameter dan kapasiti asas',
+    'Satu gandar sahaja',
+  ]},
+];
+
+/* ── AUDIT TRAIL (localStorage — kekal dalam browser) ── */
+function loadAuditLog() {
+  try { return JSON.parse(localStorage.getItem('satp_audit_log') || '[]'); }
+  catch(e) { return []; }
+}
+function saveAuditLog(log) {
+  localStorage.setItem('satp_audit_log', JSON.stringify(log));
+}
+function loadDeletionLog() {
+  try { return JSON.parse(localStorage.getItem('satp_deletion_log') || '[]'); }
+  catch(e) { return []; }
+}
+function saveDeletionLog(log) {
+  localStorage.setItem('satp_deletion_log', JSON.stringify(log));
+}
+
+let AUDIT_LOG = loadAuditLog();
+let DELETION_LOG = loadDeletionLog();
+
+function addAuditEntry(reportId, veh, mode, bdm, axleCards) {
+  AUDIT_LOG.push({
+    timestamp: new Date().toISOString(),
+    reportId,
+    version: SYS_VERSION,
+    vehicle: {
+      reg: veh.reg, make: veh.make, model: veh.model, body: veh.body, pegawai: veh.pegawai
+    },
+    mode, bdm,
+    gandar: axleCards.map(a => ({
+      gNum: a.gNum, isPass: a.isPass, diff: a.diff?.toFixed(2)+'%',
+      cap: a.cap, bg: Math.round(a.bg), diamOk: a.diamOk, capOk: a.capOk
+    })),
+    allPass: axleCards.every(a => a.isPass),
+    totalGandar: axleCards.length,
+    catatan: '',
+  });
+  saveAuditLog(AUDIT_LOG);
+}
+
+function updateAuditCatatan(index, catatan) {
+  if (AUDIT_LOG[index]) {
+    AUDIT_LOG[index].catatan = catatan;
+    saveAuditLog(AUDIT_LOG);
+  }
+}
+
+function purgeAuditLog(sebab) {
+  DELETION_LOG.push({
+    timestamp: new Date().toISOString(),
+    version: SYS_VERSION,
+    sebab: sebab,
+    jumlahRekod: AUDIT_LOG.length,
+    rekodTerakhir: AUDIT_LOG.length > 0 ? AUDIT_LOG[AUDIT_LOG.length - 1].reportId : '—',
+  });
+  saveDeletionLog(DELETION_LOG);
+  AUDIT_LOG = [];
+  saveAuditLog(AUDIT_LOG);
+}
 
 /* ── CONSTANTS ── */
 const DIAM_TOLERANCE = 7.0;
@@ -763,15 +995,11 @@ function restoreTandemState() {
 }
 
 function setAxle2Type(type) {
-  // Simpan data tandem sebelum tukar (jika sedang dalam mod tandem)
   if (axle2Type === 'double') saveTandemState();
-
   axle2Type = type;
   document.getElementById('btn1axle').classList.toggle('active', type === 'single');
   document.getElementById('btn2axle').classList.toggle('active', type === 'double');
   renderAxle2(type);
-
-  // Pulihkan data tandem jika kembali ke mod tandem
   if (type === 'double') restoreTandemState();
 }
 
@@ -956,7 +1184,7 @@ function buildDoubleAxle2Body(bgAutoVal) {
       <label class="field-label">Berat Gandar (BG) — Keseluruhan Gandar 2 (60% BDM)</label>
       <input type="number" id="bg_2" class="clr" value="${bgDisplay}"
              placeholder="Auto (BDM × 60%)" readonly min="1" max="60000">
-      <span class="field-hint">BG keseluruhan 60% BDM diagih sama rata sebagai purata 50:50 untuk Axle 2A dan 2B sehingga formula rasmi diperoleh.</span>
+      <span class="field-hint">BG keseluruhan 60% BDM — setiap axle mesti memenuhi kapasiti beban ≥ 60% BDM.</span>
     </div>`;
 }
 
@@ -1242,7 +1470,9 @@ function processAxle(suffix, gNum, bdm, bg, warnings) {
     cap = liPerTyre * tyreCount;
   }
 
-  const diamOk = Math.abs(diff) <= DIAM_TOLERANCE + 1e-9;
+  // Bulatkan ke 1 titik perpuluhan sebelum banding — elak paparan vs keputusan tak konsisten
+  const diffRounded = Math.round(Math.abs(diff) * 10) / 10;
+  const diamOk = diffRounded <= DIAM_TOLERANCE;
   const capOk  = !liError && cap >= bg;
   const isPass = diamOk && capOk;
 
@@ -1264,6 +1494,25 @@ function processAxle(suffix, gNum, bdm, bg, warnings) {
     speedoRows, liError, liRaw, liPerTyre,
     capOri, liRawOri, liPerTyreOri, liErrorOri
   };
+}
+
+/* ── KEMASKINI BAS TANDEM: Trace LI 2A & 2B vs 60% BDM ── */
+function processTandemAxle(gNum, bdm, bgTotal, warnings) {
+  // bgTotal = 60% BDM — setiap axle mesti ≥ bgTotal
+  const suffixes = ['2a', '2b'];
+  const axleResults = [];
+  suffixes.forEach(suffix => {
+    const card = processAxle(suffix, gNum, bdm, bgTotal, warnings);
+    if (card) {
+      // Force cap >= BG per SOP: setiap axle mesti >= BG total (60% BDM)
+      if (card.cap < bgTotal) {
+        card.capOk = false;
+        card.isPass = false;
+      }
+      axleResults.push(card);
+    }
+  });
+  return axleResults;
 }
 
 /* ── JANA ANALISIS ── */
@@ -1326,13 +1575,10 @@ function runAnalysis() {
       if (bg > bdm) warnings.push(`Gandar ${gNum}: BG (${bg.toLocaleString()} kg) melebihi BDM — semak semula.`);
     }
 
-    // Gandar 2 Bas — 2 axle
+    // Gandar 2 Bas — 2 axle (tandem): setiap axle mesti >= 60% BDM
     if (i === 2 && isBas && axle2Type === 'double') {
-      const bgPerAxle = bg / 2;
-      const cardA = processAxle('2a', gNum, bdm, bgPerAxle, warnings);
-      const cardB = processAxle('2b', gNum, bdm, bgPerAxle, warnings);
-      if (cardA) axleCards.push(cardA);
-      if (cardB) axleCards.push(cardB);
+      const tandemCards = processTandemAxle(gNum, bdm, bg, warnings);
+      axleCards.push(...tandemCards);
       continue;
     }
 
@@ -1377,6 +1623,9 @@ function runAnalysis() {
   document.getElementById('print-ref-header').textContent = 'Ref: '   + reportId;
   document.getElementById('btnPrint').style.display       = 'flex';
 
+  // ── Rekod audit trail ──
+  addAuditEntry(reportId, veh, modeText, bdm, axleCards);
+
   // Grid class — ≤2 gandar: 2 col atau 1 col; 3 gandar: 3 col; 4+: 2 col (2 per page)
   let gridClass = n === 1 ? 'grid-col-1' : n === 2 ? 'grid-col-2' : n === 3 ? 'grid-col-3' : 'grid-col-4';
 
@@ -1401,7 +1650,7 @@ function runAnalysis() {
           </div>
         </div>
         <div class="print-meta-bar">
-          <span>Dijana oleh sistem SATP 2026</span>
+          <span>Dijana oleh sistem ${SYS_LABEL}</span>
           <span>Untuk Tujuan Semakan &amp; Rujukan Sahaja</span>
         </div>
       </div>`;
@@ -1607,7 +1856,7 @@ function buildFootnote(reportId, now, modeText, bdm, veh, screenOnly) {
       <div class="footnote-title">📋 Kriteria Kelulusan — SOP Bilangan 1 Tahun 2026 &amp; Pindaan</div>
       <ol>
         <li>Beza diameter tayar asal vs tayar baru mestilah dalam lingkungan
-          <strong>±${DIAM_TOLERANCE}%</strong>.</li>
+          <strong>±${DIAM_TOLERANCE}%</strong> (dibulatkan ke 1 titik perpuluhan sebelum penilaian).</li>
         <li>Kapasiti tayar (LI per tayar × bilangan tayar) mestilah
           <strong>≥ Berat Gandar (BG)</strong>.</li>
         <li>Nilai Aspek Ratio (AR) = <strong>${DEFAULT_AR}%</strong> jika tidak dinyatakan pada dinding tayar. Jika diisi, nilai mestilah antara <strong>${ASPECT_RATIO_MIN} hingga ${ASPECT_RATIO_MAX}</strong>.</li>
@@ -1661,9 +1910,279 @@ styleEl.textContent = `@keyframes toastIn {
 }`;
 document.head.appendChild(styleEl);
 
+/* ══════════════════════════════════════════════════
+   ADMIN PANEL FUNCTIONS
+   ══════════════════════════════════════════════════ */
+
+function promptAdminLogin() {
+  const pw = prompt('Masukkan kata laluan pentadbir:');
+  if (pw === null) return;
+  if (pw === adminPassword) {
+    openAdmin();
+  } else {
+    showAlert('Kata laluan tidak sah.');
+  }
+}
+
+function openAdmin() {
+  document.getElementById('adminOverlay').style.display = 'flex';
+  switchAdminTab('changelog');
+}
+
+function closeAdmin() {
+  document.getElementById('adminOverlay').style.display = 'none';
+}
+
+// Close on overlay click (outside panel)
+document.addEventListener('click', (e) => {
+  if (e.target.id === 'adminOverlay') closeAdmin();
+});
+
+let currentAdminTab = 'changelog';
+
+function switchAdminTab(tab) {
+  currentAdminTab = tab;
+  document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab' + tab.charAt(0).toUpperCase() + tab.slice(1)).classList.add('active');
+  renderAdminContent(tab);
+}
+
+function renderAdminContent(tab) {
+  const body = document.getElementById('adminBody');
+  if (tab === 'changelog') {
+    body.innerHTML = CHANGELOG.map(entry => `
+      <div class="cl-entry">
+        <span class="cl-ver">${esc(entry.ver)}</span>
+        <span class="cl-date">${esc(entry.tarikh)}</span>
+        <ul class="cl-items">
+          ${entry.items.map(item => `<li>${esc(item)}</li>`).join('')}
+        </ul>
+      </div>
+    `).join('');
+  } else if (tab === 'audit') {
+    let html = '';
+
+    if (AUDIT_LOG.length === 0) {
+      html += '<div class="audit-empty">Tiada rekod audit. Jana analisis untuk mula merekod.</div>';
+    } else {
+      html += AUDIT_LOG.slice().reverse().map((a, revIdx) => {
+        const realIdx = AUDIT_LOG.length - 1 - revIdx;
+        const dt = new Date(a.timestamp);
+        const dateStr = dt.toLocaleDateString('ms-MY') + ' ' + dt.toLocaleTimeString('ms-MY');
+        const statusClass = a.allPass ? 'audit-pass' : 'audit-fail';
+        const statusText = a.allPass ? 'SEMUA LULUS' : 'ADA GAGAL';
+        const gandarDetail = a.gandar.map(g =>
+          `G${g.gNum}: ${g.isPass ? '✔' : '✘'} (${g.diff}, ${g.cap.toLocaleString()}kg/${Math.round(g.bg).toLocaleString()}kg)`
+        ).join(' · ');
+        const catatanVal = a.catatan ? esc(a.catatan) : '';
+        return `
+          <div class="audit-row">
+            <div>
+              <span class="audit-id">${esc(a.reportId)}</span>
+              <span class="${statusClass}"> — ${statusText}</span>
+            </div>
+            <div class="audit-meta">
+              ${dateStr} · ${esc(a.version)} · ${esc(a.mode)} · BDM: ${a.bdm.toLocaleString()} kg ·
+              ${esc(a.vehicle.reg || '—')} · ${esc(a.vehicle.make || '')} ${esc(a.vehicle.model || '')}
+              · Pegawai: ${esc(a.vehicle.pegawai || '—')}
+            </div>
+            <div class="audit-meta">${gandarDetail}</div>
+            <div style="margin-top:4px;">
+              <input type="text" class="settings-input" style="font-size:0.82em; padding:4px 8px;"
+                placeholder="Catatan (cth: ujian kes #1, data sampel, dll)"
+                value="${catatanVal}"
+                onchange="updateAuditCatatan(${realIdx}, this.value)">
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      // Butang padam
+      html += `
+        <div style="margin-top:16px; padding-top:12px; border-top:2px solid var(--border);">
+          <div class="settings-label" style="color:var(--jpj-red);">⚠ Padam Semua Rekod Audit</div>
+          <div style="font-size:0.8em; color:var(--text-sub); margin-bottom:8px;">
+            Tindakan ini tidak boleh diundurkan. Catatan sebab pemadaman WAJIB diisi.
+          </div>
+          <div class="settings-row">
+            <input type="text" id="purgeReason" class="settings-input"
+              placeholder="Sebab pemadaman (WAJIB — sistem akan lock jika kosong)">
+            <button class="settings-btn" style="background:var(--jpj-red);" onclick="handlePurge()">Padam Semua</button>
+          </div>
+          <div class="settings-msg" id="purgeMsg"></div>
+        </div>
+      `;
+    }
+
+    // Log pemadaman terdahulu
+    if (DELETION_LOG.length > 0) {
+      html += `
+        <div style="margin-top:16px; padding-top:12px; border-top:1px solid var(--border);">
+          <div class="settings-label">Rekod Pemadaman Terdahulu</div>
+          ${DELETION_LOG.slice().reverse().map(d => {
+            const dt = new Date(d.timestamp);
+            return `<div class="audit-meta" style="margin-bottom:4px;">
+              ${dt.toLocaleDateString('ms-MY')} ${dt.toLocaleTimeString('ms-MY')} ·
+              ${esc(d.version)} · ${d.jumlahRekod} rekod dipadam ·
+              Sebab: <strong>${esc(d.sebab)}</strong>
+            </div>`;
+          }).join('')}
+        </div>
+      `;
+    }
+
+    body.innerHTML = html;
+  } else if (tab === 'settings') {
+    body.innerHTML = `
+      <div class="settings-group">
+        <div class="settings-label">Versi Sistem Semasa</div>
+        <div style="font-weight:800; color:var(--jpj-blue); font-size:1.1em;">${SYS_LABEL}</div>
+      </div>
+      <div class="settings-group">
+        <div class="settings-label">Tukar Kata Laluan Pentadbir</div>
+        <div class="settings-row">
+          <input type="password" id="pwOld" class="settings-input" placeholder="Kata laluan semasa">
+          <input type="password" id="pwNew" class="settings-input" placeholder="Kata laluan baru">
+          <button class="settings-btn" onclick="changePassword()">Tukar</button>
+        </div>
+        <div class="settings-msg" id="pwMsg"></div>
+      </div>
+      <div class="settings-group">
+        <div class="settings-label">Statistik</div>
+        <div style="color:var(--text-sub);">
+          Jumlah analisis dijana: <strong>${AUDIT_LOG.length}</strong><br>
+          Lulus: <strong>${AUDIT_LOG.filter(a => a.allPass).length}</strong> ·
+          Gagal: <strong>${AUDIT_LOG.filter(a => !a.allPass).length}</strong><br>
+          Jumlah pemadaman: <strong>${DELETION_LOG.length}</strong>
+        </div>
+      </div>
+    `;
+  }
+}
+
+function handlePurge() {
+  const reason = (document.getElementById('purgeReason')?.value || '').trim();
+  const msg = document.getElementById('purgeMsg');
+  if (!reason) {
+    msg.innerHTML = '<span style="color:var(--jpj-red); font-weight:700;">✘ Catatan sebab pemadaman WAJIB diisi. Sistem tidak membenarkan pemadaman tanpa sebab.</span>';
+    return;
+  }
+  if (reason.length < 5) {
+    msg.innerHTML = '<span style="color:var(--warn);">✘ Catatan terlalu ringkas. Sila nyatakan sebab dengan lebih jelas (min 5 aksara).</span>';
+    return;
+  }
+  if (!confirm(`Anda pasti mahu memadam ${AUDIT_LOG.length} rekod audit?\n\nSebab: "${reason}"\n\nTindakan ini TIDAK BOLEH diundurkan.`)) return;
+
+  purgeAuditLog(reason);
+  msg.innerHTML = '<span style="color:var(--safe);">✔ Semua rekod audit telah dipadam. Rekod pemadaman disimpan.</span>';
+  setTimeout(() => renderAdminContent('audit'), 1000);
+}
+
+function changePassword() {
+  const oldPw = document.getElementById('pwOld').value;
+  const newPw = document.getElementById('pwNew').value;
+  const msg = document.getElementById('pwMsg');
+  if (oldPw !== adminPassword) {
+    msg.innerHTML = '<span style="color:var(--jpj-red);">✘ Kata laluan semasa tidak betul.</span>';
+    return;
+  }
+  if (newPw.length < 4) {
+    msg.innerHTML = '<span style="color:var(--warn);">✘ Kata laluan baru mesti sekurang-kurangnya 4 aksara.</span>';
+    return;
+  }
+  adminPassword = newPw;
+  localStorage.setItem('satp_admin_pw', newPw);
+  msg.innerHTML = '<span style="color:var(--safe);">✔ Kata laluan berjaya ditukar.</span>';
+  document.getElementById('pwOld').value = '';
+  document.getElementById('pwNew').value = '';
+}
+
+function exportAdminLog() {
+  let text = `=== ${SYS_LABEL} — Admin Log ===\n`;
+  text += `Dijana: ${new Date().toLocaleString('ms-MY')}\n\n`;
+
+  if (currentAdminTab === 'changelog') {
+    text += '── CHANGELOG ──\n\n';
+    CHANGELOG.forEach(entry => {
+      text += `${entry.ver} (${entry.tarikh})\n`;
+      entry.items.forEach(item => { text += `  • ${item}\n`; });
+      text += '\n';
+    });
+  } else if (currentAdminTab === 'audit') {
+    text += '── AUDIT TRAIL ──\n\n';
+    if (AUDIT_LOG.length === 0) { text += 'Tiada rekod.\n'; }
+    else {
+      AUDIT_LOG.forEach(a => {
+        const dt = new Date(a.timestamp);
+        text += `${a.reportId}\n`;
+        text += `  Tarikh: ${dt.toLocaleString('ms-MY')} | Versi: ${a.version}\n`;
+        text += `  Kenderaan: ${a.vehicle.reg} ${a.vehicle.make} ${a.vehicle.model}\n`;
+        text += `  Pegawai: ${a.vehicle.pegawai || '—'}\n`;
+        text += `  Mod: ${a.mode} | BDM: ${a.bdm} kg | Keputusan: ${a.allPass ? 'SEMUA LULUS' : 'ADA GAGAL'}\n`;
+        a.gandar.forEach(g => {
+          text += `    G${g.gNum}: ${g.isPass?'LULUS':'GAGAL'} | Beza: ${g.diff} | Kap: ${g.cap}kg / BG: ${g.bg}kg\n`;
+        });
+        if (a.catatan) text += `  Catatan: ${a.catatan}\n`;
+        text += '\n';
+      });
+    }
+    if (DELETION_LOG.length > 0) {
+      text += '\n── REKOD PEMADAMAN ──\n\n';
+      DELETION_LOG.forEach(d => {
+        const dt = new Date(d.timestamp);
+        text += `${dt.toLocaleString('ms-MY')} | ${d.version} | ${d.jumlahRekod} rekod dipadam\n`;
+        text += `  Sebab: ${d.sebab}\n\n`;
+      });
+    }
+  }
+
+  // Copy to clipboard
+  navigator.clipboard.writeText(text).then(() => {
+    showAlert('Log berjaya disalin ke clipboard.');
+  }).catch(() => {
+    // Fallback
+    const ta = document.createElement('textarea');
+    ta.value = text; document.body.appendChild(ta);
+    ta.select(); document.execCommand('copy');
+    document.body.removeChild(ta);
+    showAlert('Log berjaya disalin ke clipboard.');
+  });
+}
+
+function printAdminLog() {
+  const body = document.getElementById('adminBody');
+  const printWin = window.open('', '_blank');
+  printWin.document.write(`
+    <html><head><title>${SYS_LABEL} — Admin Log</title>
+    <style>body{font-family:Arial,sans-serif;font-size:12px;padding:20px;color:#1e2d3d;}
+    h1{color:#003366;font-size:16px;} .entry{margin-bottom:12px;border-bottom:1px solid #ddd;padding-bottom:8px;}
+    .ver{font-weight:800;color:#003366;} .date{color:#7a92ab;} ul{padding-left:18px;} li{margin-bottom:2px;}
+    .pass{color:#1a7a3c;font-weight:700;} .fail{color:#c0392b;font-weight:700;}
+    </style></head><body>
+    <h1>${SYS_LABEL} — ${currentAdminTab === 'changelog' ? 'Changelog' : 'Audit Trail'}</h1>
+    <p style="color:#7a92ab;">Dijana: ${new Date().toLocaleString('ms-MY')}</p>
+    ${body.innerHTML}
+    </body></html>
+  `);
+  printWin.document.close();
+  printWin.print();
+}
+
+/* ── APPLY VERSION TO ALL ELEMENTS ── */
+function applyVersion() {
+  document.title = `${SYS_LABEL} — Sistem Analisis Tayar Perdagangan`;
+  const badge = document.getElementById('headerBadge');
+  if (badge) badge.innerHTML = `SATP<br>2026<br>${SYS_SHORT}`;
+  const printMeta = document.getElementById('printMetaVersion');
+  if (printMeta) printMeta.textContent = `Dijana oleh sistem ${SYS_LABEL} · Pindaan SOP: ±7% · AR=100%`;
+  const footerVer = document.getElementById('footerVersion');
+  if (footerVer) footerVer.textContent = `${SYS_LABEL} · Bahagian Kejuruteraan Automotif`;
+}
+
 /* ── INIT ── */
 initInputs();
 updateUI();
+applyVersion();
 </script>
 </body>
 </html>
